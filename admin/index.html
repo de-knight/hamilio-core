@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal | Hamim Portfolio</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Icons -->
+  <link href="../assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="../assets/vendor/icofont/icofont.min.css" rel="stylesheet">
+  <link href="../assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <script src="../assets/vendor/lucide.min.js"></script>
+
+  <!-- Inter Font (Vercel Standard Typography) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Admin Styles -->
+  <link href="css/admin.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- ==========================================
+       SECRET LOGIN OVERLAY
+  =========================================== -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card glass-panel">
+      <h2>Admin Portal</h2>
+      <p class="subtitle">Secure administrative control for Hamim's Creative Portfolio</p>
+
+      <div id="login-alert" class="alert-box alert-danger"></div>
+
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="login-username">Admin Username</label>
+          <input type="text" id="login-username" class="form-control" placeholder="Username" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Master Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn-primary">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       ADMIN DASHBOARD INTERFACE
+  =========================================== -->
+  <div id="admin-wrapper" class="admin-wrapper">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="adminApp.toggleMobileSidebar(false)"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i data-lucide="layout-dashboard" style="font-size: 1.8rem; color: var(--primary-accent);"></i>
+          <h3>Hamilio Core</h3>
+        </div>
+        <button type="button" class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close Sidebar Navigation" onclick="adminApp.toggleMobileSidebar(false)">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <ul class="sidebar-nav">
+        <li class="active"><a href="#" data-tab="overview"><i data-lucide="home"></i> <span>Overview</span></a></li>
+        <li><a href="#" data-tab="analytics"><i data-lucide="activity"></i> <span>Visitor Analytics</span></a></li>
+        <li><a href="#" data-tab="hero"><i data-lucide="image"></i> <span>Hero &amp; Branding</span></a></li>
+        <li><a href="#" data-tab="about"><i data-lucide="user"></i> <span>About &amp; Bio</span></a></li>
+        <li><a href="#" data-tab="skills"><i data-lucide="bar-chart-2"></i> <span>Skills</span></a></li>
+        <li><a href="#" data-tab="services"><i data-lucide="briefcase"></i> <span>Services</span></a></li>
+        <li><a href="#" data-tab="resume"><i data-lucide="file-text"></i> <span>Resume</span></a></li>
+        <li><a href="#" data-tab="portfolio"><i data-lucide="layout-grid"></i> <span>Portfolio Cards</span></a></li>
+        <li><a href="#" data-tab="media"><i data-lucide="images"></i> <span>Media Library</span></a></li>
+        <li><a href="#" data-tab="customization"><i data-lucide="palette"></i> <span>Customization</span></a></li>
+        <li><a href="#" data-tab="seo"><i data-lucide="search"></i> <span>SEO &amp; Meta</span></a></li>
+        <li>
+          <a href="#" data-tab="inbox">
+            <i data-lucide="mail"></i> <span>Messages Inbox</span>
+            <span id="inbox-badge" class="badge-counter" style="display: none;">0</span>
+          </a>
+        </li>
+        <li><a href="#" data-tab="settings"><i data-lucide="shield"></i> <span>Security &amp; Cloud</span></a></li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <button id="btn-logout" class="btn-logout">
+          <i data-lucide="log-out"></i> <span>Log Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+
+      <!-- Top Header -->
+      <div class="top-header">
+        <div class="top-header-left">
+          <button type="button" class="btn-sidebar-toggle" id="btn-sidebar-toggle" aria-label="Open Navigation Menu" onclick="adminApp.toggleMobileSidebar(true)">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h1>Portfolio Control Dashboard</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Manage all live content, creative services, and portfolio assets dynamically.</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a href="../index.html" target="_blank" class="btn-secondary">
+            <i data-lucide="external-link"></i> <span>View Live Site</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 1: OVERVIEW
+      ------------------------------------------ -->
+      <div id="tab-overview" class="tab-pane active">
+        <div class="stats-grid">
+          <div class="glass-panel stat-card">
+            <h4>Portfolio Projects</h4>
+            <div class="stat-value" id="stat-portfolio-count">15</div>
+          </div>
+          <div class="glass-panel stat-card">
+            <h4>Inquiries Received</h4>
+            <div class="stat-value" id="stat-messages-count">0</div>
+          </div>
+          <div class="glass-panel stat-card" style="cursor: pointer;" onclick="adminApp.switchTab('analytics')" title="Click to view live analytics">
+            <h4>Total Site Visitors</h4>
+            <div class="stat-value" id="stat-overview-visitors">0</div>
+          </div>
+          <div class="glass-panel stat-card" style="cursor: pointer;" onclick="adminApp.switchTab('analytics')" title="Click to view live analytics">
+            <h4>Avg. Staying Time</h4>
+            <div class="stat-value" id="stat-overview-staying-time">0s</div>
+          </div>
+          <div class="glass-panel stat-card">
+            <h4>Current Age Display</h4>
+            <div class="stat-value" id="preview-calculated-age">--</div>
+          </div>
+          <div class="glass-panel stat-card">
+            <h4>Mode</h4>
+            <div class="stat-value" style="font-size: 1.4rem; color: #cfcfcf;">Live Dynamic</div>
+          </div>
+        </div>
+
+        <div class="glass-panel p-4" style="padding: 24px;">
+          <h3 style="margin-bottom: 12px; color: #cfcfcf;">Quick Controls &amp; Status</h3>
+          <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 20px;">
+            Every single section of your portfolio is fully dynamic. When you make changes here, they are stored locally and instantly reflected on your site. You can monitor real-time visitor retention and geographic reach in the Analytics tab.
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-primary" onclick="adminApp.switchTab('analytics')"><i data-lucide="activity"></i> View Live Analytics Dashboard</button>
+            <button class="btn-secondary" onclick="adminApp.exportData()"><i data-lucide="download"></i> Backup Site Data (JSON)</button>
+            <button class="btn-danger" onclick="adminApp.clearAllMessages()"><i data-lucide="trash-2"></i> Purge Inbox Messages</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB: VISITOR ANALYTICS & TELEMETRY
+      ------------------------------------------ -->
+      <div id="tab-analytics" class="tab-pane">
+        <!-- Analytics Top Control Bar -->
+        <div class="analytics-header-card glass-panel">
+          <div class="analytics-header-left">
+            <h2>Visitor Analytics &amp; Real-Time Telemetry</h2>
+            <p class="subtitle">Live traffic demographics, geographic reach, retention staying time, and privacy consent metrics.</p>
+          </div>
+          <div class="analytics-header-actions">
+            <button class="btn-secondary" onclick="adminApp.refreshAnalytics()" title="Reload latest metrics">
+              <i data-lucide="refresh-cw"></i> <span>Refresh</span>
+            </button>
+            <div class="btn-group-dropdown">
+              <button class="btn-secondary" onclick="adminApp.exportAnalyticsCSV()" title="Export visitor log as CSV">
+                <i data-lucide="file-spreadsheet"></i> <span>Export CSV</span>
+              </button>
+              <button class="btn-secondary" onclick="adminApp.exportAnalyticsJSON()" title="Export visitor log as JSON">
+                <i data-lucide="download"></i> <span>JSON</span>
+              </button>
+            </div>
+            <button class="btn-danger" onclick="adminApp.resetAnalytics()" title="Clear analytics metrics">
+              <i data-lucide="trash-2"></i> <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 KPI Summary Cards -->
+        <div class="stats-grid analytics-kpis-grid">
+          <div class="glass-panel stat-card">
+            <div class="stat-card-header">
+              <h4>Total Visits</h4>
+              <span class="kpi-mini-badge" id="kpi-unique-badge">-- Unique</span>
+            </div>
+            <div class="stat-value" id="kpi-total-visits">0</div>
+            <div class="stat-subtext" id="kpi-visits-today">+0 recorded today</div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-card-header">
+              <h4>Avg. Staying Time</h4>
+              <span class="kpi-mini-badge badge-retention" id="kpi-duration-badge">Retention</span>
+            </div>
+            <div class="stat-value" id="kpi-avg-duration">0s</div>
+            <div class="stat-subtext" id="kpi-duration-subtext">Active reading time</div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-card-header">
+              <h4>Top Visitor Country</h4>
+              <span class="kpi-mini-badge" id="kpi-country-count">0 visits</span>
+            </div>
+            <div class="stat-value" id="kpi-top-country" style="font-size: 1.55rem;">--</div>
+            <div class="stat-subtext" id="kpi-country-subtext">Dominant traffic origin</div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-card-header">
+              <h4>Bounce Rate (&lt;30s)</h4>
+              <span class="kpi-mini-badge badge-bounce" id="kpi-bounce-badge">Quick Exits</span>
+            </div>
+            <div class="stat-value" id="kpi-bounce-rate">0%</div>
+            <div class="stat-subtext" id="kpi-bounce-subtext">Sessions under 30s</div>
+          </div>
+
+          <div class="glass-panel stat-card">
+            <div class="stat-card-header">
+              <h4>Privacy Consent</h4>
+              <span class="kpi-mini-badge badge-consent" id="kpi-consent-ratio">--</span>
+            </div>
+            <div class="stat-value" id="kpi-consent-rate">0%</div>
+            <div class="stat-subtext" id="kpi-consent-subtext">Accepted / Opt-in rate</div>
+          </div>
+        </div>
+
+        <!-- 2x2 Charts Grid -->
+        <div class="analytics-charts-grid">
+          <!-- Chart 1: Traffic & Pageviews Timeline -->
+          <div class="glass-panel chart-panel">
+            <div class="chart-panel-header">
+              <div>
+                <h3>Daily Traffic &amp; Page Views</h3>
+                <p class="chart-subtitle">Timeline trend over the past 14 days</p>
+              </div>
+              <div class="chart-legend-pill">
+                <span class="legend-dot dot-green"></span> Visits
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-traffic-timeline"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Visitor Countries Distribution -->
+          <div class="glass-panel chart-panel">
+            <div class="chart-panel-header">
+              <div>
+                <h3>Audience Geolocation Breakdown</h3>
+                <p class="chart-subtitle">Top countries &amp; international distribution</p>
+              </div>
+              <div class="chart-legend-pill">
+                <span class="legend-dot dot-blue"></span> Countries
+              </div>
+            </div>
+            <div class="chart-with-legend-container">
+              <div class="chart-doughnut-wrapper">
+                <canvas id="chart-countries-pie"></canvas>
+              </div>
+              <div class="countries-legend-scroll" id="countries-legend-list">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart 3: Staying Time Duration Histogram -->
+          <div class="glass-panel chart-panel">
+            <div class="chart-panel-header">
+              <div>
+                <h3>Staying Time &amp; Reader Retention</h3>
+                <p class="chart-subtitle">Distribution of active browsing duration</p>
+              </div>
+              <div class="chart-legend-pill">
+                <span class="legend-dot dot-amber"></span> Retention
+              </div>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-staying-time"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 4: Devices & Browsers Distribution -->
+          <div class="glass-panel chart-panel">
+            <div class="chart-panel-header">
+              <div>
+                <h3>Devices &amp; Browser Architecture</h3>
+                <p class="chart-subtitle">Hardware platforms &amp; web engines</p>
+              </div>
+              <div class="chart-legend-pill">
+                <span class="legend-dot dot-purple"></span> Platforms
+              </div>
+            </div>
+            <div class="chart-with-legend-container">
+              <div class="chart-doughnut-wrapper">
+                <canvas id="chart-devices"></canvas>
+              </div>
+              <div class="devices-legend-scroll" id="devices-legend-list">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Visitor Telemetry Data Table -->
+        <div class="glass-panel visitor-table-panel" style="margin-top: 24px; padding: 24px;">
+          <div class="visitor-table-header">
+            <div>
+              <h3>Live Visitor Sessions &amp; Telemetry Log</h3>
+              <p class="chart-subtitle">Individual session records with location, staying duration, and hardware metadata</p>
+            </div>
+            <div class="visitor-table-filter-bar">
+              <div class="search-input-wrapper">
+                <i data-lucide="search"></i>
+                <input type="text" id="analytics-search-input" class="form-control table-search" placeholder="Filter by country, city, browser, OS, referrer..." oninput="adminApp.filterAnalyticsTable()">
+              </div>
+              <select id="analytics-filter-device" class="form-control filter-select" onchange="adminApp.filterAnalyticsTable()">
+                <option value="all">All Devices</option>
+                <option value="Desktop">Desktop</option>
+                <option value="Mobile">Mobile</option>
+                <option value="Tablet">Tablet</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive" style="margin-top: 16px; overflow-x: auto;">
+            <table class="inbox-table analytics-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Session ID</th>
+                  <th style="width: 180px;">Country &amp; Location</th>
+                  <th style="width: 130px;">Staying Time</th>
+                  <th style="width: 150px;">Device &amp; OS</th>
+                  <th style="width: 120px;">Browser</th>
+                  <th style="width: 140px;">Traffic Source</th>
+                  <th style="width: 120px;">Consent</th>
+                  <th>Sections Viewed</th>
+                  <th style="width: 130px; text-align: right;">Last Active</th>
+                </tr>
+              </thead>
+              <tbody id="analytics-sessions-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 2: HERO & BRANDING
+      ------------------------------------------ -->
+      <div id="tab-hero" class="tab-pane">
+        <div class="glass-panel" style="padding: 28px;">
+          <h2 style="margin-bottom: 20px;">Hero &amp; Landing Section</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full Display Name</label>
+              <input type="text" id="hero-name" class="form-control" placeholder="Hamim Mahamud Hamy">
+              <small class="helper-text">Primary H1 heading displayed on your hero landing screen.</small>
+            </div>
+            <div class="form-group">
+              <label>Professional Title / Focus <span style="color: var(--primary-accent); font-weight: 600;">(Underlined Text)</span></label>
+              <input type="text" id="hero-title" class="form-control" placeholder="Head of Creative &amp; HR | Business Management Executive">
+              <small class="helper-text">Target: The green underlined role inside &ldquo;I am [Title] at Omega Solution&rdquo;.</small>
+            </div>
+            <div class="form-group form-grid-full">
+              <label>Hero Tagline / Sub-headline</label>
+              <input type="text" id="hero-tagline" class="form-control" placeholder="Leading creative direction, technical web optimization, SEO strategy, and agile operations at Omega Solution." oninput="adminApp.syncHeroTagline(this.value)">
+              <small class="helper-text">Target: Subtitle paragraph displayed below your title on the hero screen. Syncs with Brand Tagline.</small>
+            </div>
+            <div class="form-group">
+              <label>WebP Hero Background URL / Path</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="hero-bg-webp" class="form-control" placeholder="assets/img/hero-bg.webp">
+                <button type="button" class="media-picker-btn" style="margin-top: 0; white-space: nowrap;" onclick="adminApp.openMediaPicker('hero-bg-webp', 'image')"><i data-lucide="image"></i> Choose</button>
+              </div>
+              <small style="color: var(--text-muted);">Save your WebP image to assets/img/hero-bg.webp or pick from Media.</small>
+            </div>
+            <div class="form-group">
+              <label>Fallback Background URL / Path</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="hero-bg-fallback" class="form-control" placeholder="assets/img/bg1-opt.jpg">
+                <button type="button" class="media-picker-btn" style="margin-top: 0; white-space: nowrap;" onclick="adminApp.openMediaPicker('hero-bg-fallback', 'image')"><i data-lucide="image"></i> Choose</button>
+              </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="form-group form-grid-full">
+              <h3 style="margin-top: 10px; margin-bottom: 12px; font-size: 1.1rem;">Social Media Profiles</h3>
+            </div>
+            <div class="form-group">
+              <label>Twitter / X Profile URL</label>
+              <input type="text" id="social-twitter" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Facebook Profile URL</label>
+              <input type="text" id="social-facebook" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Instagram Profile URL</label>
+              <input type="text" id="social-instagram" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Skype Invite Link</label>
+              <input type="text" id="social-skype" class="form-control">
+            </div>
+            <div class="form-group form-grid-full">
+              <label>LinkedIn Profile URL</label>
+              <input type="text" id="social-linkedin" class="form-control">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top: 16px; width: auto; padding: 12px 28px;" onclick="adminApp.saveHero()">Save Hero Changes</button>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 3: ABOUT & BIO
+      ------------------------------------------ -->
+      <div id="tab-about" class="tab-pane">
+        <div class="glass-panel" style="padding: 28px;">
+          <h2 style="margin-bottom: 20px;">About Me Profile &amp; Dynamic Age</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Profile Image URL / Path</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="about-profile-image" class="form-control" placeholder="assets/img/profile-opt.jpg">
+                <button type="button" class="media-picker-btn" style="margin-top: 0; white-space: nowrap;" onclick="adminApp.openMediaPicker('about-profile-image', 'image')"><i data-lucide="image"></i> Choose</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Reference Birth Date (YYYY-MM-DD)</label>
+              <input type="date" id="about-birthdate" class="form-control" value="2004-03-30">
+              <small style="color: #a0a0a0;">
+                * Note: Your exact birth date is hidden from public display. The website calculates and renders your exact age automatically.
+              </small>
+            </div>
+            <div class="form-group form-grid-full">
+              <label>Headline Title</label>
+              <input type="text" id="about-headline" class="form-control">
+            </div>
+            <div class="form-group form-grid-full">
+              <label>Quote</label>
+              <textarea id="about-quote" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Website Display</label>
+              <input type="text" id="about-website" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="about-phone" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>City &amp; Country</label>
+              <input type="text" id="about-city" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Degree / Qualification</label>
+              <input type="text" id="about-degree" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Contact Email</label>
+              <input type="email" id="about-email" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Freelance Availability</label>
+              <input type="text" id="about-freelance" class="form-control" placeholder="Available">
+            </div>
+            <div class="form-group form-grid-full">
+              <label>Detailed Bio Paragraph</label>
+              <textarea id="about-bio" class="form-control" rows="4"></textarea>
+            </div>
+
+            <!-- Stats Counters -->
+            <div class="form-group form-grid-full">
+              <h3 style="margin-top: 10px; margin-bottom: 12px; font-size: 1.1rem;">Counter Statistics</h3>
+            </div>
+            <div class="form-group">
+              <label>Happy Clients Count</label>
+              <input type="number" id="stat-happy-clients" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Projects Completed</label>
+              <input type="number" id="stat-projects-done" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Hours of Support</label>
+              <input type="number" id="stat-support-hours" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Hard Workers / Team</label>
+              <input type="number" id="stat-hard-workers" class="form-control">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top: 16px; width: auto; padding: 12px 28px;" onclick="adminApp.saveAbout()">Save About Changes</button>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 4: SKILLS
+      ------------------------------------------ -->
+      <div id="tab-skills" class="tab-pane">
+        <div class="glass-panel" style="padding: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+              <h2>Skills Manager</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Each skill card can be individually edited, tuned, or removed.</p>
+            </div>
+            <button class="btn-primary" style="width: 40px; height: 40px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 1.1rem;" title="Add New Skill" aria-label="Add New Skill" onclick="adminApp.openAddSkillModal()">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+          <div id="admin-skills-list"></div>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 5: SERVICES
+      ------------------------------------------ -->
+      <div id="tab-services" class="tab-pane">
+        <div class="glass-panel" style="padding: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+              <h2>Creative &amp; Business Services</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Tailor your service offerings for 3D animation, video, branding, and creative consulting.</p>
+            </div>
+            <button class="btn-primary" style="width: 40px; height: 40px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 1.1rem;" title="Add New Service" aria-label="Add New Service" onclick="adminApp.openAddServiceModal()">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+          <div id="admin-services-list"></div>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 6: RESUME
+      ------------------------------------------ -->
+      <div id="tab-resume" class="tab-pane">
+        <!-- PDF File Settings -->
+        <div class="glass-panel" style="padding: 28px;">
+          <h2 style="margin-bottom: 12px;">Resume File &amp; Download Settings</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Configure the downloadable and embedded PDF version of your resume.</p>
+          <div class="form-grid">
+            <div class="form-group form-grid-full">
+              <label>Compressed PDF Resume Path / URL</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="resume-pdf-url" class="form-control" placeholder="assets/img/HamimMahamudHamyCV.pdf">
+                <button type="button" class="media-picker-btn" style="margin-top: 0; white-space: nowrap;" onclick="adminApp.openMediaPicker('resume-pdf-url', 'document')"><i data-lucide="file-text"></i> Choose from Media</button>
+              </div>
+              <small style="color: var(--text-muted);">Drop your compressed resume PDF into assets/img/ or pick from Media.</small>
+            </div>
+            <div class="form-group form-grid-full">
+              <label>Download Filename</label>
+              <input type="text" id="resume-download-name" class="form-control" placeholder="HamimMahamudHamyCV.pdf">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top: 16px; width: auto; padding: 12px 28px;" onclick="adminApp.saveResume()">Save Resume Settings</button>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 7: PORTFOLIO CARDS
+      ------------------------------------------ -->
+      <div id="tab-portfolio" class="tab-pane">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <h2>Dynamic Portfolio Cards</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Create, update, or remove portfolio showcase cards with video, images, or documents.</p>
+          </div>
+          <button class="btn-primary" style="width: 40px; height: 40px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 1.1rem;" title="Add Project Card" aria-label="Add Project Card" onclick="adminApp.openAddPortfolioModal()">
+            <i data-lucide="plus"></i>
+          </button>
+        </div>
+
+        <div id="admin-portfolio-grid" class="portfolio-cards-grid"></div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB: MEDIA LIBRARY & UPLOADS
+      ------------------------------------------ -->
+      <div id="tab-media" class="tab-pane">
+        <div class="glass-panel" style="padding: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h2>Media Library &amp; Uploads</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">Upload images, videos, and PDF documents. Select them seamlessly across your portfolio without typing URLs.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn-secondary" style="padding: 10px 16px; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; border-color: rgba(24, 210, 110, 0.4); color: #18d26e; font-weight: 600;" onclick="adminApp.openOptimizationHubModal()">
+                <i data-lucide="zap"></i> Optimization Hub &amp; Tools
+              </button>
+              <label class="btn-primary" style="cursor: pointer; width: auto; padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 0;">
+                <i data-lucide="upload-cloud" style="font-size: 1.2rem;"></i> Upload Files
+                <input type="file" id="media-library-upload-input" multiple accept="image/*,video/*,application/pdf" style="display: none;">
+              </label>
+            </div>
+          </div>
+
+          <!-- Media Optimization Engine Toolbar -->
+          <div class="media-optimization-toolbar" style="margin-bottom: 18px; padding: 12px 18px; background: rgba(24, 210, 110, 0.04); border: 1px solid rgba(24, 210, 110, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+              <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 600; color: #fff; margin-bottom: 0;">
+                <input type="checkbox" id="chk-auto-optimize-upload" checked style="accent-color: var(--primary-accent); width: 16px; height: 16px;">
+                <span><i data-lucide="zap" style="width: 14px; height: 14px; color: var(--primary-accent); vertical-align: middle;"></i> Auto-Optimize on Upload</span>
+              </label>
+
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Format:</span>
+                <select id="opt-target-format" class="form-control" style="width: auto; padding: 4px 8px; font-size: 0.82rem; height: 32px; background: #121418; border-color: rgba(255,255,255,0.15); color: #fff;">
+                  <option value="auto">Auto (Best Modern)</option>
+                  <option value="webp" selected>WebP (.webp)</option>
+                  <option value="avif">AVIF (.avif)</option>
+                </select>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Quality:</span>
+                <select id="opt-target-quality" class="form-control" style="width: auto; padding: 4px 8px; font-size: 0.82rem; height: 32px; background: #121418; border-color: rgba(255,255,255,0.15); color: #fff;">
+                  <option value="0.75">Compact (75%)</option>
+                  <option value="0.82" selected>Balanced (82%)</option>
+                  <option value="0.90">High (90%)</option>
+                  <option value="0.95">Maximum (95%)</option>
+                </select>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Max Res:</span>
+                <select id="opt-target-maxdim" class="form-control" style="width: auto; padding: 4px 8px; font-size: 0.82rem; height: 32px; background: #121418; border-color: rgba(255,255,255,0.15); color: #fff;">
+                  <option value="0">Original Size</option>
+                  <option value="2560">2K (2560px)</option>
+                  <option value="1920" selected>Full HD (1920px)</option>
+                  <option value="1280">HD (1280px)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="font-size: 0.78rem; color: var(--text-muted);">
+              <span id="opt-engine-status-badge" style="display: inline-flex; align-items: center; gap: 4px; color: #18d26e;">
+                <i data-lucide="check-circle" style="width: 14px; height: 14px;"></i> Engine Active
+              </span>
+            </div>
+          </div>
+
+          <!-- Drag & Drop Zone -->
+          <div id="media-dropzone" class="media-upload-dropzone">
+            <i data-lucide="upload-cloud" style="font-size: 3rem; color: #cfcfcf; margin-bottom: 8px; display: block;"></i>
+            <h4 style="color: #cfcfcf; margin-bottom: 6px;">Drag and drop media files here</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0;">Supports Images (WebP, PNG, JPG, GIF), Videos (MP4, WebM), and Documents (PDF)</p>
+          </div>
+
+          <!-- Upload & Conversion Status Card -->
+          <div id="media-upload-status" style="display: none; margin-bottom: 20px; padding: 14px 18px; background: #14171d; border: 1px solid rgba(24, 210, 110, 0.3); border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span id="media-upload-status-title" style="font-weight: 600; font-size: 0.88rem; color: #fff;">Optimizing &amp; Uploading Media...</span>
+              <span id="media-upload-status-percent" style="font-size: 0.82rem; color: var(--primary-accent); font-weight: 700;">0%</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden;">
+              <div id="media-upload-progress-bar" style="width: 0%; height: 100%; background: var(--primary-accent); transition: width 0.2s ease;"></div>
+            </div>
+            <div id="media-upload-status-details" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;"></div>
+          </div>
+
+          <!-- Filter & Search Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <div class="media-filter-bar" style="margin-bottom: 0;">
+              <button type="button" class="filter-pill active" onclick="adminApp.filterMediaLibrary('all', this)">All Files (<span id="media-count-all">0</span>)</button>
+              <button type="button" class="filter-pill" onclick="adminApp.filterMediaLibrary('image', this)"><i data-lucide="image"></i> Images (<span id="media-count-image">0</span>)</button>
+              <button type="button" class="filter-pill" onclick="adminApp.filterMediaLibrary('video', this)"><i data-lucide="video"></i> Videos (<span id="media-count-video">0</span>)</button>
+              <button type="button" class="filter-pill" onclick="adminApp.filterMediaLibrary('document', this)"><i data-lucide="file-text"></i> Documents (<span id="media-count-doc">0</span>)</button>
+            </div>
+            <div style="min-width: 220px;">
+              <input type="text" id="media-search-input" class="form-control" placeholder="Search media by name..." style="padding: 6px 12px; font-size: 0.85rem;" oninput="adminApp.searchMediaLibrary(this.value)">
+            </div>
+          </div>
+
+          <!-- Batch Selection & Format Conversion Action Bar -->
+          <div class="media-batch-action-bar" id="media-batch-action-bar">
+            <div class="batch-bar-left">
+              <label class="batch-select-all-label" title="Select or deselect all visible images">
+                <input type="checkbox" id="media-select-all-checkbox" class="media-checkbox-custom-input" onchange="adminApp.toggleSelectAllMedia(this.checked)">
+                <span class="batch-select-all-text">Select All Images</span>
+              </label>
+              <span class="batch-selected-count-badge" id="batch-selected-count-badge" style="display: none;">
+                <span id="batch-selected-count">0</span> Selected
+              </span>
+              <button type="button" class="btn-batch-clear" id="btn-batch-clear-btn" style="display: none;" onclick="adminApp.clearMediaSelection()" title="Clear selection">
+                Clear
+              </button>
+            </div>
+
+            <div class="batch-bar-right">
+              <!-- Selected Conversion Buttons -->
+              <div class="batch-action-subgroup">
+                <span class="batch-subgroup-label">Selected:</span>
+                <button type="button" class="btn-batch-opt btn-batch-webp" id="btn-batch-sel-webp" onclick="adminApp.convertSelectedImages('webp')" disabled title="Convert selected images to WebP">
+                  <i data-lucide="zap"></i> Convert to WebP
+                </button>
+                <button type="button" class="btn-batch-opt btn-batch-avif" id="btn-batch-sel-avif" onclick="adminApp.convertSelectedImages('avif')" disabled title="Convert selected images to AVIF">
+                  <i data-lucide="sparkles"></i> Convert to AVIF
+                </button>
+              </div>
+
+              <div class="batch-bar-vsep"></div>
+
+              <!-- All Images Global Conversion Buttons -->
+              <div class="batch-action-subgroup">
+                <span class="batch-subgroup-label">All Images:</span>
+                <button type="button" class="btn-batch-opt btn-batch-all" id="btn-batch-all-webp" onclick="adminApp.convertAllImages('webp')" title="Convert all PNG/JPG images in media library to WebP">
+                  <i data-lucide="layers"></i> Make All WebP
+                </button>
+                <button type="button" class="btn-batch-opt btn-batch-all" id="btn-batch-all-avif" onclick="adminApp.convertAllImages('avif')" title="Convert all PNG/JPG images in media library to AVIF">
+                  <i data-lucide="layers"></i> Make All AVIF
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Media Grid -->
+          <div id="admin-media-grid" class="media-grid"></div>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 8: CONTACT INBOX
+      ------------------------------------------ -->
+      <div id="tab-inbox" class="tab-pane">
+        <div class="glass-panel" style="padding: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+              <h2>Contact Inquiries Inbox</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem;">View client messages and delete them when finished to prevent storage pileup.</p>
+            </div>
+            <button id="btn-delete-selected" class="btn-danger" style="opacity: 0.45; cursor: not-allowed; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-weight: 600;" onclick="adminApp.deleteSelectedMessages()" disabled title="Select messages below to delete">
+              <i data-lucide="trash-2"></i> Delete Selected (<span id="selected-msg-count">0</span>)
+            </button>
+          </div>
+
+          <div class="inbox-layout">
+            <div style="overflow-x: auto;">
+              <table class="inbox-table">
+                <thead>
+                  <tr>
+                    <th style="width: 36px; text-align: center;">
+                      <input type="checkbox" id="inbox-select-all" class="inbox-checkbox" title="Select All Messages" onchange="adminApp.toggleSelectAllMessages(this.checked)">
+                    </th>
+                    <th style="width: 28px; text-align: center;"></th>
+                    <th>Date</th>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-inbox-body"></tbody>
+              </table>
+            </div>
+
+            <!-- Right Empty Space: Drag-and-Delete Dustbin Drop Zone -->
+            <div id="inbox-dustbin" class="inbox-dustbin-zone">
+              <div class="dustbin-icon-wrapper">
+                <i data-lucide="trash-2" class="dustbin-icon"></i>
+              </div>
+              <h4 class="dustbin-title">Trash Bin</h4>
+              <p class="dustbin-desc">Drag any message here to delete</p>
+              <div class="dustbin-status-pill">Drop Zone</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- -----------------------------------------
+           TAB: CUSTOMIZATION (COLORS, TYPOGRAPHY, SITE IDENTITY)
+      ------------------------------------------ -->
+      <div id="tab-customization" class="tab-pane">
+
+        <!-- 1. Global Colors -->
+        <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="margin: 0 0 6px 0;"><i data-lucide="palette" style="color: var(--primary-accent);"></i> Global Color System</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+                Change your website theme colors with the visual color picker or hex codes. Changes apply dynamically across all components.
+              </p>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 10px 22px;" onclick="adminApp.saveCustomization()"><i data-lucide="save"></i> Save Customization</button>
+          </div>
+
+          <!-- Quick Palette Presets -->
+          <div style="margin-bottom: 20px;">
+            <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 8px;">Quick Color Presets:</label>
+            <div class="palette-preset-row">
+              <button type="button" class="palette-chip" style="--chip-color: #18d26e;" onclick="adminApp.applyColorPreset('#18d26e', '#35e888')">
+                <span class="chip-dot"></span> Emerald (Default)
+              </button>
+              <button type="button" class="palette-chip" style="--chip-color: #0070f3;" onclick="adminApp.applyColorPreset('#0070f3', '#3291ff')">
+                <span class="chip-dot"></span> Electric Blue
+              </button>
+              <button type="button" class="palette-chip" style="--chip-color: #00e5ff;" onclick="adminApp.applyColorPreset('#00e5ff', '#64f2ff')">
+                <span class="chip-dot"></span> Neon Cyan
+              </button>
+              <button type="button" class="palette-chip" style="--chip-color: #8a2be2;" onclick="adminApp.applyColorPreset('#8a2be2', '#a855f7')">
+                <span class="chip-dot"></span> Cyber Purple
+              </button>
+              <button type="button" class="palette-chip" style="--chip-color: #f5a623;" onclick="adminApp.applyColorPreset('#f5a623', '#ffbe53')">
+                <span class="chip-dot"></span> Amber Gold
+              </button>
+              <button type="button" class="palette-chip" style="--chip-color: #ff0055;" onclick="adminApp.applyColorPreset('#ff0055', '#ff3377')">
+                <span class="chip-dot"></span> Crimson Red
+              </button>
+            </div>
+          </div>
+
+          <!-- Color Pickers Grid -->
+          <div class="color-picker-grid">
+            <!-- Primary Accent Color -->
+            <div class="color-control-card">
+              <label>Primary Accent Color</label>
+              <div class="color-input-group">
+                <input type="color" id="picker-primary-color" value="#18d26e" class="color-swatch-input">
+                <input type="text" id="custom-primary-color" class="form-control color-hex-input" placeholder="#18d26e">
+              </div>
+              <small class="helper-text">Buttons, icons, active nav links, borders &amp; highlights.</small>
+            </div>
+
+            <!-- Primary Hover Color -->
+            <div class="color-control-card">
+              <label>Accent Hover Color</label>
+              <div class="color-input-group">
+                <input type="color" id="picker-hover-color" value="#35e888" class="color-swatch-input">
+                <input type="text" id="custom-hover-color" class="form-control color-hex-input" placeholder="#35e888">
+              </div>
+              <small class="helper-text">Button hover states, link highlights &amp; active states.</small>
+            </div>
+
+            <!-- Background Color -->
+            <div class="color-control-card">
+              <label>Dark Background Color</label>
+              <div class="color-input-group">
+                <input type="color" id="picker-bg-color" value="#040404" class="color-swatch-input">
+                <input type="text" id="custom-bg-color" class="form-control color-hex-input" placeholder="#040404">
+              </div>
+              <small class="helper-text">Main canvas background beneath hero and sections.</small>
+            </div>
+
+            <!-- Card / Panel Background -->
+            <div class="color-control-card">
+              <label>Card / Panel Surface</label>
+              <div class="color-input-group">
+                <input type="color" id="picker-card-color" value="#0e0e0e" class="color-swatch-input">
+                <input type="text" id="custom-card-color" class="form-control color-hex-input" placeholder="#0e0e0e">
+              </div>
+              <small class="helper-text">Portfolio cards, info boxes &amp; service panels.</small>
+            </div>
+
+            <!-- Primary Text Color -->
+            <div class="color-control-card">
+              <label>Primary Text Color</label>
+              <div class="color-input-group">
+                <input type="color" id="picker-text-color" value="#ffffff" class="color-swatch-input">
+                <input type="text" id="custom-text-color" class="form-control color-hex-input" placeholder="#ffffff">
+              </div>
+              <small class="helper-text">Headings, titles, and high-emphasis body text.</small>
+            </div>
+
+            <!-- Muted Text Color -->
+            <div class="color-control-card">
+              <label>Muted / Subtitle Text</label>
+              <div class="color-input-group">
+                <input type="color" id="picker-muted-color" value="#b0b0b0" class="color-swatch-input">
+                <input type="text" id="custom-muted-color" class="form-control color-hex-input" placeholder="#b0b0b0">
+              </div>
+              <small class="helper-text">Descriptions, labels, and secondary metadata.</small>
+            </div>
+          </div>
+
+          <!-- Live Theme Swatch Preview -->
+          <div class="theme-live-preview-box" id="theme-live-preview">
+            <span class="preview-tag">Live Color Palette Preview</span>
+            <div class="preview-row">
+              <button type="button" class="preview-btn-sample" id="preview-primary-btn"><i data-lucide="check"></i> Primary Action</button>
+              <button type="button" class="preview-btn-outline" id="preview-outline-btn"><i data-lucide="download"></i> Outline Button</button>
+              <span class="preview-badge-sample" id="preview-badge-sample">3D Animation &amp; VFX</span>
+              <a href="#" class="preview-link-sample" id="preview-link-sample" onclick="return false;">Interactive Link &rarr;</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Typography -->
+        <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
+          <h2 style="margin-bottom: 8px;"><i data-lucide="type" style="color: var(--primary-accent);"></i> Typography &amp; Web Fonts</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+            Choose from popular Google Font combinations, enter custom Google Font links, or upload custom font files (.woff2, .woff, .ttf, .otf).
+          </p>
+
+          <!-- Preset Pairings Dropdown -->
+          <div class="form-grid" style="margin-bottom: 20px;">
+            <div class="form-group">
+              <label>Font Pairings Preset</label>
+              <select id="typography-preset" class="form-control" onchange="adminApp.applyTypographyPreset(this.value)">
+                <option value="default">Default: Inter (All - Modern Minimalist)</option>
+                <option value="poppins">Bold &amp; Expressive: Poppins (All)</option>
+                <option value="montserrat">Editorial Luxury: Playfair Display (Headings) + Montserrat (Body)</option>
+                <option value="roboto">Tech &amp; Creative: Fira Code (Headings) + Roboto (Body)</option>
+                <option value="custom">Custom Font Specification</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Google Fonts Embed URL</label>
+              <input type="text" id="custom-google-font-url" class="form-control" placeholder="https://fonts.googleapis.com/css2?family=...">
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-bottom: 20px;">
+            <div class="form-group">
+              <label>Headings Font Family (CSS font-family)</label>
+              <input type="text" id="custom-heading-font" class="form-control" placeholder="'Raleway', sans-serif" oninput="adminApp.updateTypographyPreview()">
+            </div>
+            <div class="form-group">
+              <label>Body Font Family (CSS font-family)</label>
+              <input type="text" id="custom-body-font" class="form-control" placeholder="'Open Sans', sans-serif" oninput="adminApp.updateTypographyPreview()">
+            </div>
+          </div>
+
+          <!-- Custom Font File Upload -->
+          <div style="background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 18px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+              <div>
+                <h4 style="margin: 0 0 4px 0; color: #cfcfcf;"><i data-lucide="upload" style="color: var(--primary-accent);"></i> Upload Custom Font File</h4>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">Supported formats: .woff2 (recommended for best performance), .woff, .ttf, .otf</p>
+              </div>
+              <span id="custom-font-status" class="badge" style="background: rgba(255, 255, 255, 0.08); color: #cfcfcf; border: 1px solid rgba(255, 255, 255, 0.15); display: none;">Custom Font Loaded</span>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Custom Font Name (e.g. MyBrandFont)</label>
+                <input type="text" id="custom-font-name" class="form-control" placeholder="e.g. SpaceGrotesk">
+              </div>
+              <div class="form-group">
+                <label>Select Font File (.woff2, .woff, .ttf, .otf)</label>
+                <input type="file" id="custom-font-file-input" class="form-control" accept=".woff2,.woff,.ttf,.otf" onchange="adminApp.handleCustomFontUpload(this)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Typography Preview Sample -->
+          <div class="typography-preview-box" id="typography-preview-box">
+            <h2 id="typo-preview-h1" style="margin: 0 0 8px 0; color: #cfcfcf;">Hamim Mahamud Hamy</h2>
+            <h4 id="typo-preview-h2" style="margin: 0 0 12px 0; color: var(--primary-accent); font-weight: 500;">Head of Creative &amp; HR | Business Management Executive</h4>
+            <p id="typo-preview-p" style="margin: 0; color: #cfcfcf; line-height: 1.6; font-size: 0.95rem;">
+              Driving creative direction, technical web optimization, SEO strategy, and agile operations at Omega Solution.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3. Site Identity -->
+        <div class="glass-panel" style="padding: 28px;">
+          <h2 style="margin-bottom: 8px;"><i data-lucide="check-circle-2" style="color: var(--primary-accent);"></i> Site Identity &amp; Branding</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">
+            Configure your brand identity including the navbar logo, brand site title, hero tagline, and browser favicon. Proper sizes are specified below.
+          </p>
+
+          <!-- Logo Section -->
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+              <div>
+                <h3 style="margin: 0 0 4px 0; color: #cfcfcf;">Site Logo</h3>
+                <span class="spec-chip spec-recommended"><i data-lucide="info"></i> Recommended: 250 &times; 60 px &bull; Transparent PNG, SVG, or WebP &bull; Max 150 KB</span>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <label style="font-size: 0.85rem; color: var(--text-muted);">Logo Display Mode:</label>
+                <select id="identity-logo-type" class="form-control" style="width: 130px; padding: 6px 10px; font-size: 0.85rem;" onchange="adminApp.toggleLogoType(this.value)">
+                  <option value="text">Text Logo</option>
+                  <option value="image">Image Logo</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="logo-image-controls" style="display: none;">
+              <div class="form-group">
+                <label>Logo Image Path or URL</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="identity-logo-image" class="form-control" placeholder="assets/img/logo.png or https://..." oninput="adminApp.previewLogo(this.value)">
+                  <button type="button" class="media-picker-btn" style="white-space: nowrap;" onclick="adminApp.openMediaPicker('identity-logo-image', 'image')"><i data-lucide="image"></i> Choose from Media</button>
+                </div>
+              </div>
+
+              <!-- Logo Preview Container -->
+              <div class="identity-preview-card" style="margin-top: 12px;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Logo Header Preview:</span>
+                <div id="logo-preview-box" class="logo-preview-container">
+                  <span id="logo-preview-placeholder" style="color: var(--text-muted); font-size: 0.85rem;">No logo image selected</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Site Title & Tagline -->
+          <div class="form-grid" style="margin-bottom: 24px;">
+            <div class="form-group">
+              <label>Site Title *</label>
+              <input type="text" id="identity-site-title" class="form-control" required placeholder="Hamim Mahamud Hamy" oninput="adminApp.updateIdentityPreview()">
+              <small class="helper-text">Displayed in the header when text logo is selected, and used across browser tab &amp; SEO.</small>
+            </div>
+
+            <div class="form-group">
+              <label>Hero &amp; Brand Tagline *</label>
+              <input type="text" id="identity-tagline" class="form-control" required placeholder="Leading creative direction, technical web optimization, SEO strategy, and agile operations at Omega Solution." oninput="adminApp.syncIdentityTagline(this.value)">
+              <small class="helper-text spec-recommended" style="display: block; margin-top: 4px;">Target: Hero tagline paragraph &amp; browser tab title. Distinct from Professional Title / Focus.</small>
+            </div>
+          </div>
+
+          <!-- Site Icon / Favicon -->
+          <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 20px; margin-bottom: 20px;">
+            <div style="margin-bottom: 14px;">
+              <h3 style="margin: 0 0 4px 0; color: #cfcfcf;">Site Icon (Favicon &amp; App Icon)</h3>
+              <span class="spec-chip spec-recommended"><i data-lucide="info"></i> Recommended: Square 512 &times; 512 px (PNG/ICO) &bull; Transparent or Dark Background &bull; For browser tabs, bookmarks &amp; mobile homescreens</span>
+            </div>
+
+            <div class="form-group">
+              <label>Site Icon Image Path or URL</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="identity-site-icon" class="form-control" placeholder="assets/img/hvec.png" oninput="adminApp.previewFavicon(this.value)">
+                <button type="button" class="media-picker-btn" style="white-space: nowrap;" onclick="adminApp.openMediaPicker('identity-site-icon', 'image')"><i data-lucide="image"></i> Choose from Media</button>
+              </div>
+            </div>
+
+            <!-- Browser Tab Mockup -->
+            <div class="browser-tab-mockup" style="margin-top: 14px;">
+              <div class="mockup-header">
+                <span class="mockup-dot red"></span>
+                <span class="mockup-dot yellow"></span>
+                <span class="mockup-dot green"></span>
+                <div class="mockup-tab">
+                  <img id="mockup-tab-favicon" src="../assets/img/hvec.png" alt="Favicon" class="mockup-tab-icon">
+                  <span id="mockup-tab-title" class="mockup-tab-text">Hamim Mahamud Hamy | Head of Creative &amp; HR</span>
+                  <span class="mockup-tab-close">&times;</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+            <button class="btn-primary" style="width: auto; padding: 12px 32px;" onclick="adminApp.saveCustomization()"><i data-lucide="save"></i> Save All Customization Settings</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- -----------------------------------------
+           TAB: SEO & META SETTINGS
+      ------------------------------------------ -->
+      <div id="tab-seo" class="tab-pane">
+
+        <!-- 1. General SEO & Search Snippet -->
+        <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <h2 style="margin: 0 0 6px 0;"><i data-lucide="search" style="color: var(--primary-accent);"></i> Search Engine Optimization (SEO)</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+                Fine-tune search titles, meta descriptions, focus keyphrases, and index directives to rank on Google.
+              </p>
+            </div>
+            <button class="btn-primary" style="width: auto; padding: 10px 22px;" onclick="adminApp.saveSEO()"><i data-lucide="save"></i> Save SEO Settings</button>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Site Title *</label>
+              <input type="text" id="seo-site-title" class="form-control" required placeholder="Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive" oninput="adminApp.updateSEOPreview()">
+              <small class="helper-text">Base title representing your brand or portfolio site.</small>
+            </div>
+
+            <div class="form-group">
+              <label>SEO Title (Browser &amp; SERP Title) *</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span></span>
+                <span id="seo-title-count" class="char-count-badge" style="font-size: 0.75rem;">0 / 60 chars</span>
+              </div>
+              <input type="text" id="seo-title" class="form-control" required placeholder="Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive" oninput="adminApp.updateSEOPreview()">
+              <small class="helper-text spec-recommended">Optimal: 50–60 characters. Appears as the clickable blue title in Google results.</small>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Website Language &amp; Translation (<code>lang</code> attribute) *</label>
+              <select id="seo-language" class="form-control">
+                <option value="en">English (en) - Default</option>
+                <option value="bn">Bengali (bn)</option>
+                <option value="es">Spanish (es)</option>
+                <option value="fr">French (fr)</option>
+                <option value="de">German (de)</option>
+                <option value="it">Italian (it)</option>
+                <option value="pt">Portuguese (pt)</option>
+                <option value="ar">Arabic (ar)</option>
+                <option value="hi">Hindi (hi)</option>
+                <option value="ja">Japanese (ja)</option>
+                <option value="ko">Korean (ko)</option>
+                <option value="zh">Chinese (zh)</option>
+                <option value="ru">Russian (ru)</option>
+              </select>
+              <small class="helper-text">Sets root HTML <code>lang</code> and <code>translate="yes"</code> so browsers &amp; translation services can translate the entire site context.</small>
+            </div>
+
+            <div class="form-group">
+              <label>Focus Keyphrase</label>
+              <input type="text" id="seo-focus-keyphrase" class="form-control" placeholder="e.g. Head of Creative &amp; HR Business Management Executive Omega Solution" oninput="adminApp.updateSEOPreview()">
+              <small class="helper-text">The main search query you want your portfolio to rank for.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Meta Title</label>
+            <input type="text" id="seo-meta-title" class="form-control" placeholder="Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive" oninput="adminApp.updateSEOPreview()">
+            <small class="helper-text">Fallback title used in HTML meta title tags.</small>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label style="margin: 0;">Meta Description *</label>
+              <span id="seo-desc-count" class="char-count-badge" style="font-size: 0.75rem;">0 / 160 chars</span>
+            </div>
+            <textarea id="seo-meta-desc" class="form-control" rows="3" placeholder="Official portfolio of Hamim Mahamud Hamy — Head of Creative &amp; HR and Business Management Executive at Omega Solution. Specializing in SEO strategy, web performance optimization, creative direction, and B2B growth." oninput="adminApp.updateSEOPreview()"></textarea>
+            <small class="helper-text spec-recommended">Optimal: 120–160 characters. Appears under the title in search engine result pages.</small>
+          </div>
+
+          <div class="form-group">
+            <label>Featured Image (Default Share &amp; Rich Snippet Image)</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="seo-featured-image" class="form-control" placeholder="assets/img/profile-opt.jpg" oninput="adminApp.updateSEOPreview()">
+              <button type="button" class="media-picker-btn" style="white-space: nowrap;" onclick="adminApp.openMediaPicker('seo-featured-image', 'image')"><i data-lucide="image"></i> Choose from Media</button>
+            </div>
+            <span class="spec-chip spec-recommended" style="margin-top: 6px; display: inline-block;"><i data-lucide="info"></i> Recommended: 1200 &times; 630 px &bull; JPG or WebP &bull; Under 300 KB</span>
+          </div>
+
+          <!-- Google SERP Live Preview -->
+          <div class="serp-preview-card" style="margin-top: 20px;">
+            <div class="serp-header">
+              <i data-lucide="globe" style="color: #4285f4; font-size: 1.2rem;"></i>
+              <span style="font-size: 0.8rem; font-weight: 600; color: #cfcfcf; text-transform: uppercase;">Google Search Result Live Preview</span>
+            </div>
+            <div class="serp-body">
+              <div class="serp-breadcrumb">
+                <img id="serp-preview-favicon" src="../assets/img/hvec.png" alt="" class="serp-favicon">
+                <span class="serp-url">https://hamilio.netlify.app</span>
+              </div>
+              <div id="serp-preview-title" class="serp-title">Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive</div>
+              <div id="serp-preview-snippet" class="serp-snippet">
+                Official portfolio of Hamim Mahamud Hamy — Head of Creative &amp; HR and Business Management Executive at Omega Solution. Specializing in SEO strategy, web performance optimization, creative direction, and B2B growth.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Social Sharing (Open Graph - Facebook / LinkedIn) -->
+        <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
+          <h2 style="margin-bottom: 8px;"><i data-lucide="share-2" style="color: #1877f2;"></i> Social Media Previews (Open Graph)</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+            Customize the card that appears when your portfolio link is pasted into Facebook, LinkedIn, Discord, WhatsApp, or Slack.
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Social Title (og:title)</label>
+              <input type="text" id="seo-social-title" class="form-control" placeholder="Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive" oninput="adminApp.updateSocialPreview()">
+            </div>
+            <div class="form-group">
+              <label>Social Image (og:image)</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="seo-social-image" class="form-control" placeholder="assets/img/profile-opt.jpg" oninput="adminApp.updateSocialPreview()">
+                <button type="button" class="media-picker-btn" style="white-space: nowrap;" onclick="adminApp.openMediaPicker('seo-social-image', 'image')"><i data-lucide="image"></i> Choose</button>
+              </div>
+              <span class="spec-chip spec-recommended" style="margin-top: 6px; display: inline-block;">Optimal: 1200 &times; 630 px (1.91:1 ratio)</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Social Description (og:description)</label>
+            <textarea id="seo-social-desc" class="form-control" rows="2" placeholder="Official portfolio of Hamim Mahamud Hamy — Head of Creative &amp; HR and Business Management Executive at Omega Solution. Specializing in SEO strategy, web performance optimization, creative direction, and B2B growth." oninput="adminApp.updateSocialPreview()"></textarea>
+          </div>
+
+          <!-- Live Social Card Preview -->
+          <div class="social-preview-card" style="margin-top: 16px;">
+            <div class="social-preview-image-wrap">
+              <img id="social-preview-img" src="../assets/img/profile-opt.jpg" alt="Social Share Preview">
+            </div>
+            <div class="social-preview-info">
+              <span class="social-preview-domain">HAMILIO.NETLIFY.APP</span>
+              <h4 id="social-preview-title" class="social-preview-title">Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive</h4>
+              <p id="social-preview-desc" class="social-preview-desc">
+                Official portfolio of Hamim Mahamud Hamy — Head of Creative &amp; HR and Business Management Executive at Omega Solution. Specializing in SEO strategy, web performance optimization, creative direction, and B2B growth.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. X (Twitter) Card Settings -->
+        <div class="glass-panel" style="padding: 28px;">
+          <h2 style="margin-bottom: 8px;"><i data-lucide="message-square-share" style="color: #1da1f2;"></i> X / Twitter Card Settings</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+            Configure large image cards (summary_large_image) for posts shared on X (formerly Twitter).
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>X Title (twitter:title)</label>
+              <input type="text" id="seo-x-title" class="form-control" placeholder="Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive" oninput="adminApp.updateXPreview()">
+            </div>
+            <div class="form-group">
+              <label>X Image (twitter:image)</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="seo-x-image" class="form-control" placeholder="assets/img/profile-opt.jpg" oninput="adminApp.updateXPreview()">
+                <button type="button" class="media-picker-btn" style="white-space: nowrap;" onclick="adminApp.openMediaPicker('seo-x-image', 'image')"><i data-lucide="image"></i> Choose</button>
+              </div>
+              <span class="spec-chip spec-recommended" style="margin-top: 6px; display: inline-block;">Optimal: 1200 &times; 600 px or 1200 &times; 630 px</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>X Description (twitter:description)</label>
+            <textarea id="seo-x-desc" class="form-control" rows="2" placeholder="Official portfolio of Hamim Mahamud Hamy — Head of Creative &amp; HR and Business Management Executive at Omega Solution. Specializing in SEO strategy, web performance optimization, creative direction, and B2B growth." oninput="adminApp.updateXPreview()"></textarea>
+          </div>
+
+          <!-- Live X Card Preview -->
+          <div class="x-preview-card" style="margin-top: 16px;">
+            <div class="x-preview-image-wrap">
+              <img id="x-preview-img" src="../assets/img/profile-opt.jpg" alt="X Share Preview">
+            </div>
+            <div class="x-preview-content">
+              <span class="x-preview-domain">hamilio.netlify.app</span>
+              <h4 id="x-preview-title" class="x-preview-title">Hamim Mahamud Hamy | Head of Creative &amp; HR | Business Management Executive</h4>
+              <p id="x-preview-desc" class="x-preview-desc">
+                Official portfolio of Hamim Mahamud Hamy — Head of Creative &amp; HR and Business Management Executive at Omega Solution. Specializing in SEO strategy, web performance optimization, creative direction, and B2B growth.
+              </p>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+            <button class="btn-primary" style="width: auto; padding: 12px 32px;" onclick="adminApp.saveSEO()"><i data-lucide="save"></i> Save All SEO Settings</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- -----------------------------------------
+           TAB 9: SECURITY, CLOUD & BACKUP
+      ------------------------------------------ -->
+      <div id="tab-settings" class="tab-pane">
+
+        <!-- 1. Administrator Credentials & Security Card -->
+        <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+            <div>
+              <h2 style="margin: 0 0 6px 0;"><i data-lucide="shield" style="color: var(--primary-accent);"></i> Administrator Credentials</h2>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+                Update your login username or master password. Current password verification is required to authorize all credential changes.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span class="spec-chip spec-recommended"><i data-lucide="user-check"></i> Current User: <strong id="active-username-display" style="color: #cfcfcf; margin-left: 4px;">DeKnight</strong></span>
+              <span class="spec-chip spec-recommended"><i data-lucide="lock"></i> SHA-256 Protected</span>
+            </div>
+          </div>
+
+          <!-- Dual Column: Change Username & Change Password -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+            
+            <!-- Box 1: Change Username -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 22px; display: flex; flex-direction: column;">
+              <h3 style="margin: 0 0 6px 0; color: #cfcfcf;"><i data-lucide="user-cog" style="color: var(--primary-accent);"></i> Change Username</h3>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Change the login handle used to access this Admin Portal.</p>
+
+              <div id="username-change-alert" class="alert-box" style="display: none; margin-bottom: 14px;"></div>
+
+              <form id="change-username-form" onsubmit="event.preventDefault(); adminApp.changeAdminUsername();" style="display: flex; flex-direction: column; flex-grow: 1;">
+                <div class="form-group">
+                  <label for="username-new">New Username *</label>
+                  <input type="text" id="username-new" class="form-control" required placeholder="Enter new username" autocomplete="username">
+                  <small class="helper-text">Minimum 3 characters, alphanumeric &amp; underscore.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="username-pwd-verify">Current Password (to authorize) *</label>
+                  <input type="password" id="username-pwd-verify" class="form-control" required placeholder="Enter current master password" autocomplete="current-password">
+                </div>
+
+                <div style="margin-top: auto; padding-top: 12px;">
+                  <button type="submit" class="btn-primary" style="width: 100%; padding: 11px;">
+                    <i data-lucide="check"></i> Update Username
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Box 2: Change Master Password -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 22px; display: flex; flex-direction: column;">
+              <h3 style="margin: 0 0 6px 0; color: #cfcfcf;"><i data-lucide="key" style="color: var(--primary-accent);"></i> Change Master Password</h3>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 16px;">Update your password with SHA-256 cryptographic verification.</p>
+
+              <div id="pwd-change-alert" class="alert-box" style="display: none; margin-bottom: 14px;"></div>
+
+              <form id="change-password-form" onsubmit="event.preventDefault(); adminApp.changeAdminPassword();" style="display: flex; flex-direction: column; flex-grow: 1;">
+                <div class="form-group">
+                  <label for="pwd-current">Current Password *</label>
+                  <input type="password" id="pwd-current" class="form-control" required placeholder="Enter current master password" autocomplete="current-password">
+                </div>
+
+                <div class="form-group">
+                  <label for="pwd-new">New Password *</label>
+                  <input type="password" id="pwd-new" class="form-control" required placeholder="Enter new password (min 6 chars)" autocomplete="new-password">
+                </div>
+
+                <div class="form-group">
+                  <label for="pwd-confirm">Confirm New Password *</label>
+                  <input type="password" id="pwd-confirm" class="form-control" required placeholder="Re-type new password" autocomplete="new-password">
+                </div>
+
+                <div style="margin-top: auto; padding-top: 12px;">
+                  <button type="submit" class="btn-primary" style="width: 100%; padding: 11px;">
+                    <i data-lucide="shield-check"></i> Update Password
+                  </button>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="glass-panel" style="padding: 28px; margin-bottom: 24px;">
+          <h2 style="margin-bottom: 12px;">Cloud Synchronization (Optional)</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+            Connect your free Supabase project to sync all portfolio items and contact inquiries across multiple devices.
+          </p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Supabase Project URL</label>
+              <input type="text" id="supabase-url" class="form-control" placeholder="https://xyzcompany.supabase.co">
+            </div>
+            <div class="form-group">
+              <label>Supabase Public Anon Key</label>
+              <input type="text" id="supabase-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+            </div>
+            <div class="form-group form-grid-full">
+              <label>Cloudflare Turnstile Site Key (Free Bot Protection)</label>
+              <input type="text" id="turnstile-key" class="form-control" placeholder="0x4AAAAAA...">
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top: 16px; width: auto; padding: 12px 28px;" onclick="adminApp.saveSettings()">Save Cloud Settings</button>
+        </div>
+
+        <div class="glass-panel" style="padding: 28px;">
+          <h2 style="margin-bottom: 12px;">Data Backup &amp; Migration</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+            Export your entire site configuration, portfolio items, and messages as a portable JSON file.
+          </p>
+          <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+            <button class="btn-secondary" onclick="adminApp.exportData()"><i data-lucide="download"></i> Export Data (JSON)</button>
+            <label class="btn-secondary" style="cursor: pointer; margin-bottom: 0;">
+              <i data-lucide="upload"></i> Import Backup (JSON)
+              <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="adminApp.importData(this)">
+            </label>
+            <button class="btn-danger" onclick="if(confirm('Restore all portfolio cards and settings to default?')) { window.PortfolioDataService.resetDefaults(); adminApp.loadAllData(); }">
+              <i data-lucide="rotate-ccw"></i> Reset Factory Defaults
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ==========================================
+       PORTFOLIO CARD MODAL (ADD / EDIT)
+  =========================================== -->
+  <div id="portfolio-modal" class="modal-overlay">
+    <div class="modal-container glass-panel">
+      <div class="modal-header">
+        <h2 id="portfolio-modal-title">Add Portfolio Project</h2>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closePortfolioModal()">&times;</button>
+      </div>
+
+      <form id="portfolio-form" onsubmit="event.preventDefault(); adminApp.savePortfolioItem();">
+        <div class="form-group">
+          <label>Project Title / Heading *</label>
+          <input type="text" id="port-title" class="form-control" required placeholder="e.g. 3D Animation Showcase">
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Media Type *</label>
+            <select id="port-media-type" class="form-control" required>
+              <option value="image">Image (WebP / PNG / JPG)</option>
+              <option value="video">Video (MP4 / WebM)</option>
+              <option value="document">Document (PDF)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Category *</label>
+            <input type="text" id="port-category" class="form-control" placeholder="e.g. 3D Animation, VFX, Design">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Media File Path or URL *</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="port-media-url" class="form-control" required placeholder="assets/img/project.mp4 or https://...">
+            <button type="button" class="media-picker-btn" style="margin-top: 0; white-space: nowrap;" onclick="adminApp.openMediaPicker('port-media-url')"><i data-lucide="image"></i> Choose from Media</button>
+          </div>
+          <div style="margin-top: 8px;">
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Or upload a file directly to your Media Library:</label>
+            <input type="file" id="port-file-upload" class="form-control" style="padding: 6px;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Short Description *</label>
+          <textarea id="port-description" class="form-control" rows="3" placeholder="Brief overview of what was created..."></textarea>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tools Used</label>
+            <input type="text" id="port-tools" class="form-control" placeholder="Blender, Premiere Pro, Photoshop">
+          </div>
+
+          <div class="form-group">
+            <label>Client</label>
+            <input type="text" id="port-client" class="form-control" placeholder="Client Name or Personal Project">
+          </div>
+
+          <div class="form-group form-grid-full">
+            <label>Date / Year</label>
+            <input type="text" id="port-date" class="form-control" placeholder="2025 or January 2025">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="adminApp.closePortfolioModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SKILL MODAL (INDIVIDUALLY EDITABLE)
+  =========================================== -->
+  <div id="skill-modal" class="modal-overlay">
+    <div class="modal-container glass-panel">
+      <div class="modal-header">
+        <h2 id="skill-modal-title">Edit Skill Card</h2>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeSkillModal()">&times;</button>
+      </div>
+
+      <form id="skill-form" onsubmit="event.preventDefault(); adminApp.saveSkillItem();">
+        <div class="form-group">
+          <label>Skill Name *</label>
+          <input type="text" id="skill-modal-name" class="form-control" required placeholder="e.g. 3D Animation & Modeling">
+        </div>
+
+        <div class="form-group">
+          <label>Proficiency Percentage (0 - 100%) *</label>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <input type="range" id="skill-modal-range" min="0" max="100" class="form-control" style="flex: 1;" oninput="document.getElementById('skill-modal-level').value = this.value">
+            <input type="number" id="skill-modal-level" min="0" max="100" class="form-control" style="width: 80px; text-align: center;" required oninput="document.getElementById('skill-modal-range').value = this.value">
+            <span style="font-weight: 700; color: #cfcfcf;">%</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="adminApp.closeSkillModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">Save Skill Card</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SERVICE MODAL (INDIVIDUALLY EDITABLE)
+  =========================================== -->
+  <div id="service-modal" class="modal-overlay">
+    <div class="modal-container glass-panel">
+      <div class="modal-header">
+        <h2 id="service-modal-title">Edit Service</h2>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeServiceModal()">&times;</button>
+      </div>
+
+      <form id="service-form" onsubmit="event.preventDefault(); adminApp.saveServiceItem();">
+        <div class="form-group">
+          <label>Service Title *</label>
+          <input type="text" id="service-modal-title-input" class="form-control" required placeholder="e.g. 3D Animation & Modeling">
+        </div>
+
+        <div class="form-group">
+          <label>Service Icon (Lucide Icon Name)</label>
+          <input type="text" id="service-modal-icon" class="form-control" placeholder="e.g. box, video, palette, briefcase, sparkles, layers" value="sparkles">
+          <small class="helper-text">Examples: box, video, palette, briefcase, layers, sparkles, check, film, layout-grid</small>
+        </div>
+
+        <div class="form-group">
+          <label>Service Description *</label>
+          <textarea id="service-modal-desc" class="form-control" rows="3" required placeholder="Describe what you provide for clients..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+          <button type="button" class="btn-secondary" onclick="adminApp.closeServiceModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">Save Service</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MEDIA PICKER MODAL (CHOOSE FROM MEDIA)
+  =========================================== -->
+  <div id="media-picker-modal" class="modal-overlay">
+    <div class="modal-container glass-panel media-picker-modal-container">
+      <div class="modal-header">
+        <div>
+          <h2 id="media-picker-title">Select Media Asset</h2>
+          <p id="media-picker-subtitle" style="color: var(--text-muted); font-size: 0.82rem; margin: 0;">Click on any asset to select it for your form field</p>
+        </div>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeMediaPicker()">&times;</button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+        <div class="media-filter-bar" style="margin-bottom: 0;">
+          <button type="button" class="filter-pill active" onclick="adminApp.filterPickerGrid('all', this)">All</button>
+          <button type="button" class="filter-pill" onclick="adminApp.filterPickerGrid('image', this)"><i data-lucide="image"></i> Images</button>
+          <button type="button" class="filter-pill" onclick="adminApp.filterPickerGrid('video', this)"><i data-lucide="video"></i> Videos</button>
+          <button type="button" class="filter-pill" onclick="adminApp.filterPickerGrid('document', this)"><i data-lucide="file-text"></i> Documents</button>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="picker-search-input" class="form-control" placeholder="Search files..." style="padding: 6px 12px; font-size: 0.85rem; width: 160px;" oninput="adminApp.searchPickerGrid(this.value)">
+          <label class="btn-primary" style="cursor: pointer; padding: 6px 14px; font-size: 0.82rem; margin: 0; display: inline-flex; align-items: center; gap: 6px; width: auto;">
+            <i data-lucide="upload-cloud"></i> Upload
+            <input type="file" id="picker-inline-upload" multiple accept="image/*,video/*,application/pdf" style="display: none;">
+          </label>
+        </div>
+      </div>
+
+      <div class="media-picker-body">
+        <div id="media-picker-grid" class="media-grid"></div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button type="button" class="btn-secondary" onclick="adminApp.closeMediaPicker()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MEDIA UPLOAD DETAILS MODAL
+  =========================================== -->
+  <div id="media-upload-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container glass-panel" style="max-width: 580px; width: 92%;">
+      <div class="modal-header">
+        <div>
+          <h2 id="media-upload-modal-title">Upload Media Details</h2>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin: 0;">Specify title, alt text, and short description before saving</p>
+        </div>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeMediaUploadModal()">&times;</button>
+      </div>
+
+      <form id="media-upload-form" onsubmit="event.preventDefault(); adminApp.confirmMediaUpload();">
+        <div id="media-upload-preview-box" style="margin-bottom: 16px; display: flex; gap: 14px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px;">
+          <div id="media-upload-thumb" style="width: 72px; height: 72px; border-radius: 6px; overflow: hidden; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <!-- thumbnail preview inserted dynamically -->
+          </div>
+          <div style="flex-grow: 1; min-width: 0;">
+            <div id="media-upload-filename" style="font-weight: 600; color: #cfcfcf; word-break: break-all; font-size: 0.9rem;">filename.jpg</div>
+            <div id="media-upload-filemeta" style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">Image &bull; 1.2 MB</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="upload-media-title">Title *</label>
+          <input type="text" id="upload-media-title" class="form-control" required placeholder="Display title for this media">
+          <small class="helper-text">Display title used across the media library, portfolio, and previews.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="upload-media-alt">Alt Text (Image Accessibility &amp; SEO)</label>
+          <input type="text" id="upload-media-alt" class="form-control" placeholder="Describe this visual for screen readers and search engines">
+          <small class="helper-text">Used in <code>alt="..."</code> for screen readers, Google search indexing, and web accessibility.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="upload-media-desc">Short Description</label>
+          <textarea id="upload-media-desc" class="form-control" rows="2" placeholder="Brief note or summary about this asset..."></textarea>
+          <small class="helper-text">Optional short description displayed in media info popovers and details.</small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn-secondary" onclick="adminApp.closeMediaUploadModal()">Cancel</button>
+          <button type="submit" id="btn-confirm-upload" class="btn-primary" style="width: auto; padding: 10px 24px;">
+            <i data-lucide="upload-cloud"></i> Save to Media Library
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MEDIA EDIT DETAILS MODAL
+  =========================================== -->
+  <div id="media-edit-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container glass-panel" style="max-width: 580px; width: 92%;">
+      <div class="modal-header">
+        <div>
+          <h2>Edit Media Asset Details</h2>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin: 0;">Update alt text, title, and short description for this file</p>
+        </div>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeEditMediaModal()">&times;</button>
+      </div>
+
+      <form id="media-edit-form" onsubmit="event.preventDefault(); adminApp.saveMediaEdit();">
+        <input type="hidden" id="edit-media-id">
+
+        <div id="media-edit-preview-box" style="margin-bottom: 16px; display: flex; gap: 14px; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px;">
+          <div id="edit-media-thumb" style="width: 72px; height: 72px; border-radius: 6px; overflow: hidden; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <!-- thumbnail preview inserted dynamically -->
+          </div>
+          <div style="flex-grow: 1; min-width: 0;">
+            <div id="edit-media-filename" style="font-weight: 600; color: #cfcfcf; word-break: break-all; font-size: 0.9rem;">filename.jpg</div>
+            <div id="edit-media-filemeta" style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">1920 &times; 1080 px &bull; 1.2 MB</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-media-title">Title *</label>
+          <input type="text" id="edit-media-title" class="form-control" required placeholder="Display title for this media">
+          <small class="helper-text">Display title used across the media library and portfolio components.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-media-alt">Alt Text (Image Accessibility &amp; SEO)</label>
+          <input type="text" id="edit-media-alt" class="form-control" placeholder="Describe this visual for screen readers and search engines">
+          <small class="helper-text">Rendered in <code>alt="..."</code> for screen readers and image search ranking.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-media-desc">Short Description</label>
+          <textarea id="edit-media-desc" class="form-control" rows="2" placeholder="Brief note or summary about this asset..."></textarea>
+          <small class="helper-text">Short note shown in file info cards and media tooltips.</small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn-secondary" onclick="adminApp.closeEditMediaModal()">Cancel</button>
+          <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">
+            <i data-lucide="check"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       INBOX MESSAGE VIEWER MODAL
+  =========================================== -->
+  <div id="inbox-message-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container glass-panel" style="max-width: 620px; width: 92%;">
+      <div class="modal-header" style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(24, 210, 110, 0.12); border: 1px solid rgba(24, 210, 110, 0.28); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+            <i data-lucide="mail"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 1.15rem; margin: 0; line-height: 1.3;">Contact Inquiry</h2>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">Direct message from website visitor</p>
+          </div>
+        </div>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeMessageModal()">&times;</button>
+      </div>
+
+      <div class="inbox-modal-content">
+        <!-- Sender Header Card -->
+        <div class="inbox-msg-sender-card">
+          <div id="inbox-msg-modal-avatar" class="inbox-msg-avatar">J</div>
+          <div class="inbox-msg-sender-info">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+              <h3 id="inbox-msg-modal-name" class="inbox-msg-modal-name">Sender Name</h3>
+              <span id="inbox-msg-modal-date" class="inbox-msg-modal-date"><i data-lucide="clock" style="width: 12px; height: 12px;"></i> Just now</span>
+            </div>
+            <div class="inbox-msg-email-row">
+              <span id="inbox-msg-modal-email" class="inbox-msg-modal-email">sender@example.com</span>
+              <button type="button" class="btn-copy-mini" title="Copy email address" onclick="adminApp.copyMessageEmail()">
+                <i data-lucide="copy" style="width: 12px; height: 12px;"></i> Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subject Line -->
+        <div class="inbox-msg-subject-box">
+          <span class="inbox-msg-label">Subject</span>
+          <div id="inbox-msg-modal-subject" class="inbox-msg-subject-text">Inquiry Subject</div>
+        </div>
+
+        <!-- Message Body -->
+        <div class="inbox-msg-body-box">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="inbox-msg-label">Message Content</span>
+            <button type="button" class="btn-copy-mini" title="Copy message text" onclick="adminApp.copyMessageText()">
+              <i data-lucide="copy" style="width: 12px; height: 12px;"></i> Copy Text
+            </button>
+          </div>
+          <div id="inbox-msg-modal-body" class="inbox-msg-body-text">
+            Full message text will appear here...
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="inbox-msg-actions-footer">
+          <button type="button" class="btn-danger" id="inbox-msg-delete-btn" onclick="adminApp.deleteCurrentViewingMessage()" style="padding: 9px 16px; font-size: 0.84rem;">
+            <i data-lucide="trash-2"></i> Delete
+          </button>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="button" class="btn-secondary" onclick="adminApp.closeMessageModal()" style="padding: 9px 18px; font-size: 0.84rem;">
+              Close
+            </button>
+            <a id="inbox-msg-reply-link" href="#" class="btn-primary" style="padding: 9px 20px; font-size: 0.84rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="reply"></i> Reply via Email
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================
+       MODAL: MEDIA OPTIMIZATION ENGINE & STUDIO
+  =========================================== -->
+  <div id="optimization-hub-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-container glass-panel" style="max-width: 840px; width: 94%; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" style="margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(24, 210, 110, 0.12); border: 1px solid rgba(24, 210, 110, 0.3); color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+            <i data-lucide="zap"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 1.2rem; margin: 0; line-height: 1.3;">Media Optimization Engine &amp; Studio</h2>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">Convert images globally to WebP/AVIF and optimize portfolio videos for low-bandwidth visitors.</p>
+          </div>
+        </div>
+        <button class="modal-close" aria-label="Close modal" onclick="adminApp.closeOptimizationHubModal()">&times;</button>
+      </div>
+
+      <!-- Optimization Tabs Nav -->
+      <div class="opt-hub-nav" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px;">
+        <button type="button" class="opt-tab-btn active" id="tab-btn-opt-global" onclick="adminApp.switchOptimizationTab('global')">
+          <i data-lucide="layers"></i> Global Batch Optimizer
+        </button>
+        <button type="button" class="opt-tab-btn" id="tab-btn-opt-single" onclick="adminApp.switchOptimizationTab('single')">
+          <i data-lucide="sliders"></i> Single Image Studio
+        </button>
+        <button type="button" class="opt-tab-btn" id="tab-btn-opt-video" onclick="adminApp.switchOptimizationTab('video')">
+          <i data-lucide="video"></i> Video Low-Bandwidth Protection
+        </button>
+      </div>
+
+      <!-- PANE 1: GLOBAL BATCH OPTIMIZER -->
+      <div id="opt-pane-global" class="opt-pane active">
+        <!-- Health Cards Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px;">
+          <div class="glass-panel" style="padding: 14px; text-align: center; border-radius: 8px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Total Media</div>
+            <div id="opt-stat-total" style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-top: 4px;">0</div>
+          </div>
+          <div class="glass-panel" style="padding: 14px; text-align: center; border-radius: 8px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Unoptimized PNG/JPG</div>
+            <div id="opt-stat-unopt" style="font-size: 1.5rem; font-weight: 700; color: #facc15; margin-top: 4px;">0</div>
+          </div>
+          <div class="glass-panel" style="padding: 14px; text-align: center; border-radius: 8px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Estimated Savings</div>
+            <div id="opt-stat-savings" style="font-size: 1.5rem; font-weight: 700; color: var(--primary-accent); margin-top: 4px;">~0 MB</div>
+          </div>
+          <div class="glass-panel" style="padding: 14px; text-align: center; border-radius: 8px;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Heavy Videos Protected</div>
+            <div id="opt-stat-videos" style="font-size: 1.5rem; font-weight: 700; color: #38bdf8; margin-top: 4px;">7</div>
+          </div>
+        </div>
+
+        <!-- 1-Click Batch Image Conversion Box -->
+        <div class="glass-panel" style="padding: 20px; border-radius: 10px; margin-bottom: 16px; border: 1px solid rgba(24, 210, 110, 0.25);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="sparkles" style="color: var(--primary-accent);"></i> 1-Click Global Image Optimizer
+              </h3>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin: 4px 0 0 0;">
+                Scans all PNG and JPEG images, converts them to high-efficiency WebP or AVIF, and updates library links.
+              </p>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="opt-batch-format-select" class="form-control form-control-sm" style="width: auto; height: 34px; background: #121418; color: #fff;">
+                <option value="webp" selected>Convert to WebP (.webp)</option>
+                <option value="avif">Convert to AVIF (.avif)</option>
+              </select>
+              <button type="button" class="btn-primary" id="btn-run-batch-optimize" onclick="adminApp.runBatchImageOptimization()" style="padding: 8px 16px; font-size: 0.84rem; display: inline-flex; align-items: center; gap: 6px;">
+                <i data-lucide="play"></i> Start Batch Conversion
+              </button>
+            </div>
+          </div>
+
+          <!-- Batch Progress Box -->
+          <div id="opt-batch-progress-box" style="display: none; margin-top: 16px; padding: 14px; background: #0c0e12; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem;">
+              <span id="opt-batch-status-text" style="color: #fff; font-weight: 600;">Optimizing images...</span>
+              <span id="opt-batch-status-percent" style="color: var(--primary-accent); font-weight: 700;">0%</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 9999px; overflow: hidden; margin-bottom: 8px;">
+              <div id="opt-batch-progress-bar" style="width: 0%; height: 100%; background: var(--primary-accent); transition: width 0.25s ease;"></div>
+            </div>
+            <div id="opt-batch-status-sub" style="font-size: 0.78rem; color: var(--text-muted);"></div>
+          </div>
+        </div>
+
+        <!-- 1-Click Video Posters Box -->
+        <div class="glass-panel" style="padding: 20px; border-radius: 10px; margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="video" style="color: #38bdf8;"></i> Portfolio Video Posters Generator
+              </h3>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin: 4px 0 0 0;">
+                Extracts crisp WebP poster frames for all portfolio videos so they display instantly without buffering delays.
+              </p>
+            </div>
+            <button type="button" class="btn-secondary" onclick="adminApp.runBatchVideoPosterExtraction()" style="padding: 8px 16px; font-size: 0.84rem; display: inline-flex; align-items: center; gap: 6px; border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+              <i data-lucide="camera"></i> Generate Posters for All Videos
+            </button>
+          </div>
+          <div id="opt-video-poster-result" style="display: none; margin-top: 12px; font-size: 0.82rem; color: #38bdf8;"></div>
+        </div>
+      </div>
+
+      <!-- PANE 2: SINGLE IMAGE STUDIO -->
+      <div id="opt-pane-single" class="opt-pane" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- Controls Column -->
+          <div class="glass-panel" style="padding: 18px; border-radius: 10px;">
+            <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 14px;">Conversion Controls</h4>
+            
+            <!-- File Input -->
+            <div style="margin-bottom: 14px;">
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Choose Image to Compress:</label>
+              <input type="file" id="opt-single-file-input" accept="image/*" class="form-control" onchange="adminApp.handleSingleImageSelected(this.files[0])">
+            </div>
+
+            <!-- Target Format -->
+            <div style="margin-bottom: 14px;">
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Format:</label>
+              <div style="display: flex; gap: 10px;">
+                <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #fff;">
+                  <input type="radio" name="opt-single-format" value="webp" checked onchange="adminApp.recomputeSingleImageOptimization()"> WebP (.webp)
+                </label>
+                <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #fff;">
+                  <input type="radio" name="opt-single-format" value="avif" onchange="adminApp.recomputeSingleImageOptimization()"> AVIF (.avif)
+                </label>
+              </div>
+            </div>
+
+            <!-- Quality Slider -->
+            <div style="margin-bottom: 14px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Compression Quality:</label>
+                <span id="opt-single-quality-val" style="font-size: 0.82rem; font-weight: 700; color: var(--primary-accent);">82%</span>
+              </div>
+              <input type="range" id="opt-single-quality-slider" min="10" max="100" value="82" class="form-control" style="padding: 0; height: auto;" oninput="document.getElementById('opt-single-quality-val').textContent = this.value + '%'; adminApp.recomputeSingleImageOptimization();">
+            </div>
+
+            <!-- Max Dimension -->
+            <div style="margin-bottom: 18px;">
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Max Resolution:</label>
+              <select id="opt-single-maxdim-select" class="form-control" style="background: #121418; color: #fff;" onchange="adminApp.recomputeSingleImageOptimization()">
+                <option value="0">Original Resolution</option>
+                <option value="2560">2K / Quad HD (2560px)</option>
+                <option value="1920" selected>Full HD (1920px)</option>
+                <option value="1280">HD (1280px)</option>
+                <option value="800">Compact (800px)</option>
+              </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px;">
+              <button type="button" class="btn-primary" id="btn-opt-single-save" disabled onclick="adminApp.saveSingleOptimizedToLibrary()" style="flex: 1; padding: 9px 12px; font-size: 0.82rem; justify-content: center;">
+                <i data-lucide="plus-circle"></i> Save to Media Library
+              </button>
+              <button type="button" class="btn-secondary" id="btn-opt-single-download" disabled onclick="adminApp.downloadSingleOptimized()" style="flex: 1; padding: 9px 12px; font-size: 0.82rem; justify-content: center;">
+                <i data-lucide="download"></i> Download File
+              </button>
+            </div>
+          </div>
+
+          <!-- Comparison Column -->
+          <div class="glass-panel" style="padding: 18px; border-radius: 10px; display: flex; flex-direction: column;">
+            <h4 style="font-size: 0.95rem; margin-top: 0; margin-bottom: 14px;">Real-Time Comparison</h4>
+
+            <div style="flex: 1; min-height: 200px; display: flex; align-items: center; justify-content: center; background: #080a0d; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.15); overflow: hidden; margin-bottom: 14px; position: relative;">
+              <img id="opt-single-preview-img" src="" alt="Preview" style="max-width: 100%; max-height: 220px; object-fit: contain; display: none;">
+              <div id="opt-single-preview-empty" style="color: var(--text-muted); font-size: 0.82rem; text-align: center;">
+                <i data-lucide="image" style="font-size: 2rem; margin-bottom: 6px; display: block;"></i>
+                Select or drop an image on the left to see live preview
+              </div>
+            </div>
+
+            <!-- Stats Comparison Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.82rem;">
+              <div style="background: rgba(255, 255, 255, 0.04); padding: 8px 12px; border-radius: 6px;">
+                <span style="color: var(--text-muted); display: block; font-size: 0.72rem;">ORIGINAL</span>
+                <div id="opt-single-orig-size" style="font-weight: 600; color: #fff;">--</div>
+                <div id="opt-single-orig-dim" style="color: var(--text-muted); font-size: 0.72rem;">--</div>
+              </div>
+              <div style="background: rgba(24, 210, 110, 0.08); border: 1px solid rgba(24, 210, 110, 0.25); padding: 8px 12px; border-radius: 6px;">
+                <span style="color: var(--primary-accent); display: block; font-size: 0.72rem;">OPTIMIZED (<span id="opt-single-saved-pct">--</span>)</span>
+                <div id="opt-single-opt-size" style="font-weight: 700; color: #fff;">--</div>
+                <div id="opt-single-opt-dim" style="color: var(--text-muted); font-size: 0.72rem;">--</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANE 3: VIDEO LOW-BANDWIDTH PROTECTION -->
+      <div id="opt-pane-video" class="opt-pane" style="display: none;">
+        <div class="glass-panel" style="padding: 18px; border-radius: 10px; margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 1.05rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="shield-check" style="color: #18d26e;"></i> Low-Bandwidth Protection Architecture
+              </h3>
+              <p style="color: var(--text-muted); font-size: 0.82rem; margin: 4px 0 0 0;">
+                How your portfolio cards load heavy video reels effortlessly even on 2G, 3G, or mobile connections.
+              </p>
+            </div>
+            <button type="button" class="btn-primary" id="btn-toggle-global-data-saver" onclick="adminApp.toggleAdminDataSaverSimulator()" style="padding: 8px 16px; font-size: 0.84rem; display: inline-flex; align-items: center; gap: 6px;">
+              <i data-lucide="power"></i> Simulate Low-Bandwidth Mode
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Portfolio Assets Audit Table -->
+        <div style="overflow-x: auto;">
+          <table class="inbox-table" style="font-size: 0.84rem;">
+            <thead>
+              <tr>
+                <th>Video Asset</th>
+                <th>File Size</th>
+                <th>Estimated 3G Load Time</th>
+                <th>Protection Strategy</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="opt-video-audit-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div style="display: flex; justify-content: flex-end; margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 14px;">
+        <button type="button" class="btn-secondary" onclick="adminApp.closeOptimizationHubModal()" style="padding: 8px 20px;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Services and Logic -->
+  <script src="../assets/vendor/chart.umd.min.js"></script>
+  <script src="../assets/js/age-calculator.js"></script>
+  <script src="../assets/js/data-service.js"></script>
+  <script src="../assets/js/media-store.js"></script>
+  <!-- Global Image & Video Optimization Engines -->
+  <script src="../assets/js/image-optimizer.js"></script>
+  <script src="../assets/js/video-optimizer.js"></script>
+  <script src="js/admin.js"></script>
+
+</body>
+
+</html>

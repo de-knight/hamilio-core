@@ -172,6 +172,7 @@
       this.bindMediaHandlers();
       this.bindCustomizationEvents();
       this.bindSEOEvents();
+      this.migrateConvertedBuiltinsToRegistry();
 
       // Check existing session
       const session = getValidSession();
@@ -767,7 +768,10 @@
         } else if (item.mediaType === 'document') {
           previewMarkup = `<div style="color: #ff4d4f; font-size: 3rem; text-align: center;"><i data-lucide="file-text"></i></div>`;
         } else {
-          previewMarkup = `<img id="admin-port-media-${item.id}" src="../assets/img/hvec.png" alt="${item.title}">`;
+          const portDirectSrc = (item.mediaUrl && item.mediaUrl.startsWith('assets/'))
+            ? ('../' + item.mediaUrl)
+            : (item.mediaUrl && (item.mediaUrl.startsWith('http://') || item.mediaUrl.startsWith('https://') || item.mediaUrl.startsWith('data:')) ? item.mediaUrl : '../assets/img/hvec.png');
+          previewMarkup = `<img id="admin-port-media-${item.id}" src="${portDirectSrc}" alt="${item.title}">`;
         }
 
         return `
@@ -1518,6 +1522,49 @@
       await this.executeImageBatchConversion(allImages, format, `All ${count} Library Images`);
     }
 
+    migrateConvertedBuiltinsToRegistry() {
+      if (!window.HamilioMediaStore) return;
+      try {
+        const overrides = JSON.parse(localStorage.getItem('hamilio_builtin_media_overrides_v1') || '{}');
+        const registry = window.HamilioMediaStore.getRegistry();
+        let changed = false;
+
+        Object.keys(overrides).forEach(id => {
+          const ov = overrides[id];
+          if (ov && ov.url && (ov.url.endsWith('.webp') || (ov.format && ov.format.includes('WebP')))) {
+            const cleanUrl = ov.url;
+            const newMediaId = 'media_webp_' + id.replace(/^bm_/, '').replace(/[^a-zA-Z0-9_]/g, '_');
+            const exists = registry.some(r => r.url === cleanUrl || r.id === newMediaId);
+            if (!exists) {
+              const baseName = ov.name || cleanUrl.split('/').pop();
+              const cleanBase = baseName.replace(/\.[^/.]+$/, '').replace(/\s*\(.*\)$/, '').trim();
+              const targetTitle = (ov.title ? ov.title.replace(/\s*\(.*\)$/, '').trim() : cleanBase) + ' (WebP)';
+              const newCard = {
+                id: newMediaId,
+                name: baseName,
+                title: targetTitle,
+                alt: ov.alt || targetTitle,
+                description: `Optimized WebP image converted from ${baseName} (${ov.size || ''})`,
+                type: 'image',
+                size: ov.size || 'Optimized WEBP',
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                url: cleanUrl,
+                uploaded: true,
+                dimensions: ov.dimensions || '1920 × 1080 px',
+                format: 'WEBP Image (.webp)'
+              };
+              registry.unshift(newCard);
+              changed = true;
+            }
+          }
+        });
+
+        if (changed) {
+          window.HamilioMediaStore.saveRegistry(registry);
+        }
+      } catch (_) {}
+    }
+
     parseSizeToBytes(sizeStr) {
       if (!sizeStr) return 0;
       if (typeof sizeStr === 'number') return sizeStr;
@@ -1694,21 +1741,46 @@
 
           if (opt && opt.success && opt.blob) {
             convertedCount++;
-            totalSaved += (opt.savedBytes > 0 ? opt.savedBytes : 0);
+            const savedBytes = (opt.savedBytes > 0 ? opt.savedBytes : 0);
+            totalSaved += savedBytes;
 
             const newFormat = opt.format.toUpperCase() + ' Image (.' + opt.format + ')';
-            const newName = (item.name || 'image').replace(/\.[^/.]+$/, `.${opt.format}`);
-            const updates = {
+            const cleanBase = (item.name || 'image').replace(/\.[^/.]+$/, '').replace(/\s*\(.*\)$/, '').trim();
+            const newName = `${cleanBase}.${opt.format}`;
+            const targetTitle = (item.title ? item.title.replace(/\s*\(.*\)$/, '').trim() : cleanBase) + ' (WebP)';
+            const newMediaId = 'media_webp_' + (item.id || 'img').replace(/^bm_/, '').replace(/[^a-zA-Z0-9_]/g, '_');
+            const targetUrl = `idb:${newMediaId}`;
+            const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            const newWebpCard = {
+              id: newMediaId,
               name: newName,
-              format: newFormat,
+              title: targetTitle,
+              alt: item.alt || targetTitle,
+              description: `Optimized ${opt.format.toUpperCase()} image converted from ${item.name}`,
+              type: 'image',
               size: opt.optimizedSizeFormatted,
+              date: dateStr,
+              url: targetUrl,
+              uploaded: true,
               dimensions: `${opt.width} × ${opt.height} px`,
-              url: `idb:${item.id}`
+              format: newFormat
             };
 
-            // Persist the newly converted binary blob in IndexedDB
-            await window.HamilioMediaStore.updateMediaFileBlob(item.id, opt.blob, updates);
-            this.syncSiteDataImageReference(item.url, updates.url);
+            // Store blob and record in IndexedDB
+            await window.HamilioMediaStore.updateMediaFileBlob(newMediaId, opt.blob, newWebpCard);
+
+            // Register in custom media library so it immediately appears at the top of the Media Library!
+            const registry = window.HamilioMediaStore.getRegistry();
+            const exIdx = registry.findIndex(r => r.id === newMediaId || (r.name === newName && r.format === newFormat));
+            if (exIdx >= 0) {
+              registry[exIdx] = { ...registry[exIdx], ...newWebpCard };
+            } else {
+              registry.unshift(newWebpCard);
+            }
+            window.HamilioMediaStore.saveRegistry(registry);
+
+            this.syncSiteDataImageReference(item.url, targetUrl);
           } else {
             // Robust fallback for existing catalog files and file:/// canvas sandbox restrictions
             const pre = this.getPreRenderedWebPAsset(item, targetFormat);
@@ -1717,18 +1789,39 @@
               const newBytes = pre.bytes || Math.round(origBytes * 0.35);
               const savedBytes = origBytes > newBytes ? (origBytes - newBytes) : Math.round(origBytes * 0.5);
 
-              const cleanName = (item.name || 'image').replace(/\.[^/.]+$/, `.${targetFormat}`);
+              const cleanBase = (item.name || 'image').replace(/\.[^/.]+$/, '').replace(/\s*\(.*\)$/, '').trim();
+              const newName = `${cleanBase}.${targetFormat}`;
+              const targetTitle = (item.title ? item.title.replace(/\s*\(.*\)$/, '').trim() : cleanBase) + ' (WebP)';
               const newFormat = targetFormat.toUpperCase() + ' Image (.' + targetFormat + ')';
-              const updates = {
-                name: cleanName,
+              const targetSize = pre.size || window.HamilioMediaStore.formatFileSize(newBytes);
+              const targetDims = pre.dimensions || item.dimensions || '1920 × 1080 px';
+              const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+              const newMediaId = 'media_webp_' + (item.id || 'img').replace(/^bm_/, '').replace(/[^a-zA-Z0-9_]/g, '_');
+
+              const newWebpCard = {
+                id: newMediaId,
+                name: newName,
+                title: targetTitle,
+                alt: item.alt || targetTitle,
+                description: `Optimized WebP image converted from ${item.name} (${item.size || ''} ➔ ${targetSize})`,
+                type: 'image',
+                size: targetSize,
+                date: dateStr,
                 url: pre.url,
-                format: newFormat,
-                size: pre.size || window.HamilioMediaStore.formatFileSize(newBytes),
-                dimensions: pre.dimensions || item.dimensions || 'Optimized'
+                uploaded: true,
+                dimensions: targetDims,
+                format: newFormat
               };
 
-              // Persist metadata in media store
-              window.HamilioMediaStore.updateMediaMeta(item.id, updates);
+              // Register in custom media library so it immediately appears at the top of the Media Library!
+              const registry = window.HamilioMediaStore.getRegistry();
+              const exIdx = registry.findIndex(r => r.url === pre.url || r.id === newMediaId);
+              if (exIdx >= 0) {
+                registry[exIdx] = { ...registry[exIdx], ...newWebpCard };
+              } else {
+                registry.unshift(newWebpCard);
+              }
+              window.HamilioMediaStore.saveRegistry(registry);
 
               // If environment allows fetch, cache blob in IndexedDB as well
               try {
@@ -1736,7 +1829,7 @@
                 const resp = await fetch(resolvedDisplay);
                 if (resp.ok) {
                   const b = await resp.blob();
-                  await window.HamilioMediaStore.updateMediaFileBlob(item.id, b, updates);
+                  await window.HamilioMediaStore.updateMediaFileBlob(newMediaId, b, newWebpCard);
                 }
               } catch (_) {}
 
@@ -1926,7 +2019,7 @@
 
             if (saveBtn) {
               saveBtn.disabled = false;
-              saveBtn.innerHTML = `<i data-lucide="check"></i> Update Existing to ${targetFormat.toUpperCase()}`;
+              saveBtn.innerHTML = `<i data-lucide="plus-circle"></i> Save WebP to Media Library`;
             }
             if (downBtn) downBtn.disabled = true;
             if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
@@ -1938,54 +2031,60 @@
     async saveSingleOptimizedToLibrary() {
       if (!this.lastSingleOptResult || !window.HamilioMediaStore) return;
       const res = this.lastSingleOptResult;
+      const targetFormat = res.format || 'webp';
+      const cleanBase = (res.filename || 'image').replace(/\.[^/.]+$/, '').replace(/\s*\(.*\)$/, '').trim();
+      const newName = `${cleanBase}.${targetFormat}`;
+      const newFormat = `${targetFormat.toUpperCase()} Image (.${targetFormat})`;
+      const targetTitle = `${cleanBase} (WebP)`;
+      const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const targetDims = (res.width && res.height) ? `${res.width} × ${res.height} px` : '1920 × 1080 px';
 
-      if (this.singleStudioMediaId) {
-        const item = window.HamilioMediaStore.getMediaItem(this.singleStudioMediaId);
-        const targetFormat = res.format || 'webp';
-        const newFormat = targetFormat.toUpperCase() + ' Image (.' + targetFormat + ')';
-        const newName = res.filename || (item ? item.name : 'image').replace(/\.[^/.]+$/, `.${targetFormat}`);
+      if (res.blob) {
+        const file = new File([res.blob], newName, { type: res.mimeType || 'image/webp' });
+        await window.HamilioMediaStore.uploadFile(file, {
+          title: targetTitle,
+          alt: 'Optimized ' + targetFormat.toUpperCase() + ' image',
+          description: `Optimized via Studio: ${res.originalSizeFormatted || ''} ➔ ${res.optimizedSizeFormatted || ''} (${res.percentSaved || ''} saved)`
+        });
+      } else {
+        const newMediaId = 'media_webp_' + (this.singleStudioMediaId ? this.singleStudioMediaId.replace(/^bm_/, '').replace(/[^a-zA-Z0-9_]/g, '_') : Date.now());
+        const registry = window.HamilioMediaStore.getRegistry();
+        const targetUrl = res.targetUrl || ('assets/img/' + newName);
 
-        if (res.blob) {
-          const updates = {
-            name: newName,
-            format: newFormat,
-            size: res.optimizedSizeFormatted,
-            dimensions: `${res.width} × ${res.height} px`,
-            url: `idb:${this.singleStudioMediaId}`
-          };
-          await window.HamilioMediaStore.updateMediaFileBlob(this.singleStudioMediaId, res.blob, updates);
-          if (item) this.syncSiteDataImageReference(item.url, updates.url);
-        } else if (res.targetUrl) {
-          const updates = {
-            name: newName,
-            format: newFormat,
-            size: res.optimizedSizeFormatted,
-            dimensions: `${res.width} × ${res.height} px`,
-            url: res.targetUrl
-          };
-          window.HamilioMediaStore.updateMediaMeta(this.singleStudioMediaId, updates);
-          if (item) this.syncSiteDataImageReference(item.url, res.targetUrl);
+        const newWebpCard = {
+          id: newMediaId,
+          name: newName,
+          title: targetTitle,
+          alt: targetTitle,
+          description: `Optimized WebP image (${res.originalSizeFormatted || ''} ➔ ${res.optimizedSizeFormatted || ''})`,
+          type: 'image',
+          size: res.optimizedSizeFormatted || 'Optimized WEBP',
+          date: dateStr,
+          url: targetUrl,
+          uploaded: true,
+          dimensions: targetDims,
+          format: newFormat
+        };
+
+        const existingIdx = registry.findIndex(r => r.url === targetUrl || r.id === newMediaId);
+        if (existingIdx >= 0) {
+          registry[existingIdx] = { ...registry[existingIdx], ...newWebpCard };
+        } else {
+          registry.unshift(newWebpCard);
         }
+        window.HamilioMediaStore.saveRegistry(registry);
 
-        this.populateMediaLibrary();
-        this.updateOptimizationMetrics();
-        showToast(`✓ Updated "${newName}" to ${targetFormat.toUpperCase()}!`, 'success');
-        this.closeOptimizationHubModal();
-        this.singleStudioMediaId = null;
-        return;
+        if (this.singleStudioMediaId) {
+          const item = window.HamilioMediaStore.getMediaItem(this.singleStudioMediaId);
+          if (item) this.syncSiteDataImageReference(item.url, targetUrl);
+        }
       }
-
-      const file = new File([res.blob], res.filename, { type: res.mimeType });
-      await window.HamilioMediaStore.uploadFile(file, {
-        title: res.filename.replace(/\.[^/.]+$/, ''),
-        alt: 'Optimized ' + res.format.toUpperCase() + ' image',
-        description: `Optimized via Studio: ${res.originalSizeFormatted} ➔ ${res.optimizedSizeFormatted} (${res.percentSaved} saved)`
-      });
 
       this.populateMediaLibrary();
       this.updateOptimizationMetrics();
-      showToast(`Saved "${res.filename}" to Media Library!`, 'success');
+      showToast(`✓ Saved "${newName}" to Media Library!`, 'success');
       this.closeOptimizationHubModal();
+      this.singleStudioMediaId = null;
     }
 
     downloadSingleOptimized() {
@@ -3399,11 +3498,14 @@
           : '';
 
         const details = this.getMediaCardDetails(item);
+        const directSrc = (item.url && item.url.startsWith('assets/'))
+          ? ('../' + item.url)
+          : (item.url && (item.url.startsWith('http://') || item.url.startsWith('https://') || item.url.startsWith('data:')) ? item.url : '../assets/img/hvec.png');
 
         let previewHtml = '';
         if (item.type === 'image') {
           previewHtml = `
-            <img id="media-thumb-${item.id}" src="../assets/img/hvec.png" alt="${this.escapeHtml(item.alt || item.name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+            <img id="media-thumb-${item.id}" src="${directSrc}" alt="${this.escapeHtml(item.alt || item.name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
             <div class="media-img-fallback">
               <i data-lucide="image" style="font-size: 2rem;"></i>
               <span style="font-size: 0.72rem;">Image File</span>
@@ -3719,11 +3821,14 @@
 
       container.innerHTML = list.map(item => {
         const details = this.getMediaCardDetails(item);
+        const directSrc = (item.url && item.url.startsWith('assets/'))
+          ? ('../' + item.url)
+          : (item.url && (item.url.startsWith('http://') || item.url.startsWith('https://') || item.url.startsWith('data:')) ? item.url : '../assets/img/hvec.png');
 
         let previewHtml = '';
         if (item.type === 'image') {
           previewHtml = `
-            <img id="picker-thumb-${item.id}" src="../assets/img/hvec.png" alt="${this.escapeHtml(item.alt || item.name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
+            <img id="picker-thumb-${item.id}" src="${directSrc}" alt="${this.escapeHtml(item.alt || item.name)}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
             <div class="media-img-fallback">
               <i data-lucide="image" style="font-size: 2rem;"></i>
               <span style="font-size: 0.72rem;">Image File</span>

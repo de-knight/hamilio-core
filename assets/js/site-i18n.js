@@ -37,7 +37,7 @@
       about: {
         title: 'About',
         subtitle: 'Learn more about me',
-        headline: 'Head of Creative & HR | Business Management Executive | Digital Strategist',
+        headline: 'Head of Creative & HR | Digital Strategist',
         quote: '“Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.” — Antoine de Saint-Exupéry.',
         labelAge: 'Age:',
         labelWebsite: 'Website:',
@@ -222,7 +222,7 @@
       about: {
         title: 'পরিচিতি',
         subtitle: 'আমার সম্পর্কে আরও জানুন',
-        headline: 'হেড অব ক্রিয়েটিভ অ্যান্ড এইচআর | বিজনেস ম্যানেজমেন্ট এক্সিকিউটিভ | ডিজিটাল স্ট্র্যাটেজিস্ট',
+        headline: 'হেড অব ক্রিয়েটিভ অ্যান্ড এইচআর | ডিজিটাল স্ট্র্যাটেজিস্ট',
         quote: '“পূর্ণতা তখন অর্জিত হয় না যখন আর কিছু যোগ করার থাকে না, বরং তখন অর্জিত হয় যখন আর কিছু বাদ দেওয়ার বাকি থাকে না।” — অঁতোয়ান দ্য সাঁ-তেগজ্যুপেরি।',
         labelAge: 'বয়স:',
         labelWebsite: 'ওয়েবসাইট:',
@@ -407,7 +407,7 @@
       about: {
         title: 'Sobre mí',
         subtitle: 'Conoce más sobre mí',
-        headline: 'Director Creativo y de RRHH | Ejecutivo de Gestión Empresarial | Estratega Digital',
+        headline: 'Director Creativo y de RRHH | Estratega Digital',
         quote: '“La perfección se logra, no cuando no hay nada más que añadir, sino cuando ya no queda nada que quitar.” — Antoine de Saint-Exupéry.',
         labelAge: 'Edad:',
         labelWebsite: 'Sitio web:',
@@ -592,7 +592,7 @@
       about: {
         title: 'Über mich',
         subtitle: 'Erfahren Sie mehr über mich',
-        headline: 'Leiter Kreation & Personal | Business Management Executive | Digitaler Stratege',
+        headline: 'Leiter Kreation & Personal | Digitaler Stratege',
         quote: '„Perfektion ist nicht dann erreicht, wenn man nichts mehr hinzufügen kann, sondern wenn man nichts mehr weglassen kann.“ — Antoine de Saint-Exupéry.',
         labelAge: 'Alter:',
         labelWebsite: 'Webseite:',
@@ -777,7 +777,7 @@
       about: {
         title: 'À propos',
         subtitle: 'En savoir plus sur moi',
-        headline: 'Directeur de Création & RH | Responsable de la Gestion d\'Entreprise | Stratège Digital',
+        headline: 'Directeur de Création & RH | Stratège Digital',
         quote: '« La perfection est atteinte, non pas lorsqu\'il n\'y a plus rien à ajouter, mais lorsqu\'il n\'y a plus rien à retirer. » — Antoine de Saint-Exupéry.',
         labelAge: 'Âge :',
         labelWebsite: 'Site web :',
@@ -962,7 +962,7 @@
       about: {
         title: 'نبذة عني',
         subtitle: 'تعرف أكثر عني',
-        headline: 'مدير الإبداع والموارد البشرية | مسؤول إدارة الأعمال | استراتيجي رقمي',
+        headline: 'مدير الإبداع والموارد البشرية | استراتيجي رقمي',
         quote: '«لا يتحقق الكمال عندما لا يتبقى شيء يمكن إضافته، بل عندما لا يتبقى شيء يمكن حذفه.» — أنطوان دو سانت إكزوبيري.',
         labelAge: 'العمر:',
         labelWebsite: 'الموقع:',
@@ -1147,7 +1147,7 @@
       about: {
         title: '私について',
         subtitle: '詳しいプロフィール',
-        headline: 'クリエイティブ＆人事責任者 | 経営管理エグゼクティブ | デジタルストラテジスト',
+        headline: 'クリエイティブ＆人事責任者 | デジタルストラテジスト',
         quote: '「完璧とは、これ以上付け加えるものがないときではなく、これ以上削ぎ落とすものがないときに達成される。」— アントワーヌ・ド・サン＝テグジュペリ',
         labelAge: '年齢:',
         labelWebsite: 'ウェブサイト:',
@@ -1332,7 +1332,7 @@
       about: {
         title: 'परिचय',
         subtitle: 'मेरे बारे में और जानें',
-        headline: 'हेड ऑफ क्रिएटिव एंड एचआर | बिजनेस मैनेजमेंट एग्जीक्यूटिव | डिजिटल रणनीतिकार',
+        headline: 'हेड ऑफ क्रिएटिव एंड एचआर | डिजिटल रणनीतिकार',
         quote: '“पूर्णता तब नहीं मिलती जब जोड़ने के लिए कुछ न बचे, बल्कि तब मिलती है जब हटाने के लिए कुछ न बचे।” — एंटोनी डी सेंट-एक्सुपेरी।',
         labelAge: 'आयु:',
         labelWebsite: 'वेबसाइट:',
@@ -1605,10 +1605,18 @@
         const abSub = document.querySelector('#about .section-title p');
         if (abSub) abSub.textContent = t.about.subtitle;
 
-        const headlineEl = document.querySelector('#about .about-me .content h3');
+        const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
         if (headlineEl) {
-          if (langCode === 'en' && liveData && liveData.about && liveData.about.headline) {
-            headlineEl.textContent = liveData.about.headline;
+          const liveHeadline = (liveData && liveData.about && liveData.about.headline) ? liveData.about.headline.trim() : '';
+          if (langCode === 'en' && liveHeadline) {
+            headlineEl.textContent = liveHeadline;
+          } else if (langCode !== 'en' && liveHeadline) {
+            const isStandardRole = liveHeadline === 'Head of Creative & HR | Digital Strategist' || liveHeadline === 'Head of Creative & HR | Business Management Executive | Digital Strategist';
+            if (!isStandardRole) {
+              headlineEl.textContent = liveHeadline;
+            } else {
+              headlineEl.textContent = t.about.headline;
+            }
           } else {
             headlineEl.textContent = t.about.headline;
           }

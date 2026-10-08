@@ -30,7 +30,7 @@
     },
     about: {
       profileImage: "assets/img/profile-opt.jpg",
-      headline: "Head of Creative & HR | Business Management Executive | Digital Strategist",
+      headline: "Head of Creative & HR | Digital Strategist",
       quote: "“Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.” — Antoine de Saint-Exupéry",
       birthDate: "2004-03-30",
       website: "hamilio.netlify.app",
@@ -374,6 +374,10 @@
 
           if (parsed.hero && parsed.hero.title === 'Head of Creative & HR | Business Management Executive') {
             parsed.hero.title = 'Head of Creative & HR';
+          }
+
+          if (parsed.about && parsed.about.headline === 'Head of Creative & HR | Business Management Executive | Digital Strategist') {
+            parsed.about.headline = 'Head of Creative & HR | Digital Strategist';
           }
 
           // Automatic Upgrade to Version 2 (Head of Creative & HR / Business Management Executive profile)

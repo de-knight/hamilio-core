@@ -84,7 +84,7 @@
     }
 
     // Headline
-    const headlineEl = document.querySelector('#about .about-me .content h3');
+    const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
     if (headlineEl && about.headline) {
       headlineEl.textContent = about.headline;
     }
@@ -713,11 +713,15 @@
       window.SiteI18n.reapplyCurrentLanguage();
     }
 
-    // Explicit safeguard: ensure the hero title always matches data.hero.title when viewing in English/default
+    // Explicit safeguard: ensure hero title and about headline match data when viewing in English/default
     if (!window.SiteI18n || window.SiteI18n.getLanguage() === 'en') {
       const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
       if (titleEl && data.hero && data.hero.title) {
         titleEl.textContent = data.hero.title;
+      }
+      const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
+      if (headlineEl && data.about && data.about.headline) {
+        headlineEl.textContent = data.about.headline;
       }
     }
 
@@ -764,6 +768,10 @@
           const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
           if (titleEl && e.detail.hero && e.detail.hero.title) {
             titleEl.textContent = e.detail.hero.title;
+          }
+          const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
+          if (headlineEl && e.detail.about && e.detail.about.headline) {
+            headlineEl.textContent = e.detail.about.headline;
           }
         }
       }

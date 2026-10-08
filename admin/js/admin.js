@@ -457,7 +457,7 @@
     populateAbout() {
       const a = this.currentData.about || {};
       this.setVal('about-profile-image', a.profileImage);
-      this.setVal('about-headline', a.headline);
+      this.setVal('about-headline', a.headline || 'Head of Creative & HR | Digital Strategist');
       this.setVal('about-quote', a.quote);
       this.setVal('about-birthdate', a.birthDate || '2004-03-30');
       this.setVal('about-website', a.website);

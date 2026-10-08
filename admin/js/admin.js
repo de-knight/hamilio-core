@@ -174,6 +174,17 @@
       this.bindSEOEvents();
       this.migrateConvertedBuiltinsToRegistry();
 
+      // Apply saved favicon to admin browser tab immediately
+      try {
+        if (window.PortfolioDataService && window.HamilioMediaStore) {
+          const initData = window.PortfolioDataService.getData();
+          const siteIcon = initData?.customization?.identity?.siteIcon;
+          if (siteIcon) {
+            window.HamilioMediaStore.applyFavicon(siteIcon);
+          }
+        }
+      } catch (_) {}
+
       // Check existing session
       const session = getValidSession();
       if (session) {
@@ -2650,11 +2661,13 @@
 
     previewFavicon(url) {
       const icon = document.getElementById('mockup-tab-favicon');
-      if (!icon) return;
       if (url) {
         this.resolveAdminDisplayUrl(url).then(resolved => {
-          icon.src = resolved;
+          if (icon) icon.src = resolved;
         });
+        if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
+          window.HamilioMediaStore.applyFavicon(url);
+        }
       }
     }
 
@@ -2705,6 +2718,9 @@
       }
 
       window.PortfolioDataService.saveData(this.currentData);
+      if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
+        window.HamilioMediaStore.applyFavicon(this.currentData.customization?.identity?.siteIcon || 'assets/img/hvec.png');
+      }
       showToast('Customization settings saved successfully!');
     }
 

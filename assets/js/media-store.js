@@ -164,6 +164,159 @@
     }
 
     /**
+     * Convert any image URL, Blob, or Data URI to a clean PNG data URL for universal favicon support
+     */
+    convertImageToPngDataUrl(imgSrc, maxDim = 128) {
+      return new Promise((resolve, reject) => {
+        if (!imgSrc) return reject(new Error('No image source provided'));
+        const img = new Image();
+        if (typeof imgSrc === 'string' && imgSrc.startsWith('http')) {
+          img.crossOrigin = 'anonymous';
+        }
+        img.onload = () => {
+          try {
+            let w = img.naturalWidth || img.width || maxDim;
+            let h = img.naturalHeight || img.height || maxDim;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(16, w);
+            canvas.height = Math.max(16, h);
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            try {
+              const dataUrl = canvas.toDataURL('image/png');
+              resolve(dataUrl);
+            } catch (canvasErr) {
+              // Tainted canvas (file:/// or CORS): resolve to original imgSrc
+              resolve(imgSrc);
+            }
+          } catch (err) {
+            resolve(imgSrc);
+          }
+        };
+        img.onerror = () => resolve(imgSrc);
+        img.src = imgSrc;
+      });
+    }
+
+    /**
+     * Resolve any media URL or idb: URL to a high-compatibility Data URI suitable for browser tab favicons
+     */
+    async getFaviconDataUrl(url) {
+      if (!url) return null;
+
+      // 1. If it's already a PNG data URL, return it
+      if (typeof url === 'string' && url.startsWith('data:image/png')) {
+        return url;
+      }
+
+      let sourceBlob = null;
+      let rawDataUrl = null;
+
+      // 2. If it's an idb: URL, retrieve the fileBlob from IndexedDB
+      if (typeof url === 'string' && url.startsWith('idb:')) {
+        const id = url.substring(4);
+        const record = await this.getFile(id);
+        if (record) {
+          if (record.fileBlob) {
+            sourceBlob = record.fileBlob;
+          } else if (record.dataUrl) {
+            rawDataUrl = record.dataUrl;
+          }
+        }
+      }
+
+      // 3. If we have a blob, read as Data URL first
+      if (sourceBlob) {
+        try {
+          rawDataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(sourceBlob);
+          });
+        } catch (_) {}
+      }
+
+      // 4. If we have a raw data URL, convert it to 128x128 PNG data URL for 100% browser compatibility
+      if (rawDataUrl) {
+        try {
+          const png = await this.convertImageToPngDataUrl(rawDataUrl, 128);
+          if (png) return png;
+        } catch (_) {}
+        return rawDataUrl;
+      }
+
+      // 5. If it's a relative or web path (e.g. assets/img/hvec.webp or assets/img/hvec.png)
+      if (typeof url === 'string' && !url.startsWith('idb:')) {
+        const isInsideAdmin = (typeof window !== 'undefined' && window.location && (window.location.pathname.includes('/admin') || window.location.href.includes('/admin')));
+        const adjustedPath = (isInsideAdmin && url.startsWith('assets/')) ? ('../' + url) : url;
+
+        try {
+          const png = await this.convertImageToPngDataUrl(adjustedPath, 128);
+          if (png) return png;
+        } catch (_) {}
+
+        return adjustedPath;
+      }
+
+      return url;
+    }
+
+    /**
+     * Apply dynamic favicon to the active document head
+     */
+    async applyFavicon(url) {
+      if (!url) return;
+      try {
+        const finalUrl = await this.getFaviconDataUrl(url);
+        if (!finalUrl) return;
+
+        const isPng = finalUrl.startsWith('data:image/png') || finalUrl.includes('.png');
+        const mimeType = isPng ? 'image/png' : (finalUrl.includes('.webp') ? 'image/webp' : 'image/x-icon');
+
+        // Cache-busting for non-data URLs to bypass aggressive browser favicon caching
+        let iconHref = finalUrl;
+        if (typeof iconHref === 'string' && !iconHref.startsWith('data:')) {
+          iconHref = iconHref + (iconHref.includes('?') ? '&' : '?') + 't=' + Date.now();
+        }
+
+        // Remove all existing icon links to force browser reload
+        document.querySelectorAll('link[rel*="icon"]').forEach(el => el.remove());
+
+        // Create fresh link tags
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = mimeType;
+        link.href = iconHref;
+        document.head.appendChild(link);
+
+        const shortcut = document.createElement('link');
+        shortcut.rel = 'shortcut icon';
+        shortcut.type = mimeType;
+        shortcut.href = iconHref;
+        document.head.appendChild(shortcut);
+
+        const apple = document.createElement('link');
+        apple.rel = 'apple-touch-icon';
+        apple.href = iconHref;
+        document.head.appendChild(apple);
+      } catch (err) {
+        console.warn('Could not apply dynamic favicon:', err);
+      }
+    }
+
+    /**
      * Upload and register a file
      */
     async uploadFile(file, meta = {}) {

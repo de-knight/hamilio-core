@@ -679,13 +679,17 @@
 
       // Site Icon / Favicon
       if (identity.siteIcon) {
-        resolveMediaUrl(identity.siteIcon).then(iconUrl => {
-          if (!iconUrl) return;
-          let fav = document.querySelector('link[rel="icon"]');
-          if (fav) fav.href = iconUrl;
-          let appleFav = document.querySelector('link[rel="apple-touch-icon"]');
-          if (appleFav) appleFav.href = iconUrl;
-        });
+        if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
+          window.HamilioMediaStore.applyFavicon(identity.siteIcon);
+        } else {
+          resolveMediaUrl(identity.siteIcon).then(iconUrl => {
+            if (!iconUrl) return;
+            let fav = document.querySelector('link[rel="icon"]');
+            if (fav) fav.href = iconUrl;
+            let appleFav = document.querySelector('link[rel="apple-touch-icon"]');
+            if (appleFav) appleFav.href = iconUrl;
+          });
+        }
       }
     }
   }

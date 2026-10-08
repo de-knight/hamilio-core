@@ -509,8 +509,17 @@
         this.syncToSupabase(data);
       }
 
-      // Dispatch event for any active listeners
+      // Dispatch event for any active listeners on current window
       window.dispatchEvent(new CustomEvent('portfolioDataUpdated', { detail: data }));
+
+      // Broadcast across tabs via BroadcastChannel
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('hamilio_portfolio_sync');
+          bc.postMessage({ type: 'DATA_UPDATED', data });
+          bc.close();
+        } catch (_) {}
+      }
       return true;
     }
 

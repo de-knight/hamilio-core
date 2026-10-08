@@ -2665,7 +2665,9 @@
         this.resolveAdminDisplayUrl(url).then(resolved => {
           if (icon) icon.src = resolved;
         });
-        if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
+        if (window.HamilioMediaStore && typeof window.HamilioMediaStore.broadcastFavicon === 'function') {
+          window.HamilioMediaStore.broadcastFavicon(url);
+        } else if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
           window.HamilioMediaStore.applyFavicon(url);
         }
       }
@@ -2683,6 +2685,7 @@
     saveCustomization() {
       const existingTypo = (this.currentData.customization && this.currentData.customization.typography) || {};
       const brandTagline = this.getVal('identity-tagline') || '';
+      const siteIconVal = this.getVal('identity-site-icon') || 'assets/img/hvec.png';
       
       this.currentData.customization = {
         colors: {
@@ -2706,7 +2709,7 @@
           logoImage: this.getVal('identity-logo-image') || '',
           siteTitle: this.getVal('identity-site-title') || 'Hamim Mahamud Hamy',
           tagline: brandTagline,
-          siteIcon: this.getVal('identity-site-icon') || 'assets/img/hvec.png'
+          siteIcon: siteIconVal
         }
       };
 
@@ -2718,8 +2721,10 @@
       }
 
       window.PortfolioDataService.saveData(this.currentData);
-      if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
-        window.HamilioMediaStore.applyFavicon(this.currentData.customization?.identity?.siteIcon || 'assets/img/hvec.png');
+      if (window.HamilioMediaStore && typeof window.HamilioMediaStore.broadcastFavicon === 'function') {
+        window.HamilioMediaStore.broadcastFavicon(siteIconVal);
+      } else if (window.HamilioMediaStore && typeof window.HamilioMediaStore.applyFavicon === 'function') {
+        window.HamilioMediaStore.applyFavicon(siteIconVal);
       }
       showToast('Customization settings saved successfully!');
     }
@@ -4035,6 +4040,17 @@
         input.value = url;
         input.dispatchEvent(new Event('input', { bubbles: true }));
         input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      // If choosing site icon, immediately auto-save to site data and broadcast to all tabs
+      if (this.pickerTargetInput === 'identity-site-icon') {
+        if (!this.currentData.customization) this.currentData.customization = {};
+        if (!this.currentData.customization.identity) this.currentData.customization.identity = {};
+        this.currentData.customization.identity.siteIcon = url;
+        window.PortfolioDataService.saveData(this.currentData);
+        if (window.HamilioMediaStore && typeof window.HamilioMediaStore.broadcastFavicon === 'function') {
+          window.HamilioMediaStore.broadcastFavicon(url);
+        }
       }
 
       // If choosing for portfolio card, automatically set media type

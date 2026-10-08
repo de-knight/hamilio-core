@@ -53,6 +53,79 @@
       this.db = null;
       this.objectUrlCache = {};
       this.initDBPromise = this.initIndexedDB();
+      this.initSyncChannels();
+      this.reapplyActiveFavicon();
+    }
+
+    initSyncChannels() {
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          this.faviconChannel = new BroadcastChannel('hamilio_favicon_sync');
+          this.faviconChannel.onmessage = (event) => {
+            if (event.data && event.data.type === 'FAVICON_UPDATE' && event.data.url) {
+              this.applyFavicon(event.data.url);
+            }
+          };
+        } catch (_) {}
+      }
+
+      if (typeof window !== 'undefined') {
+        window.addEventListener('storage', (e) => {
+          if (e.key === 'hamilio_portfolio_site_data_v1' && e.newValue) {
+            try {
+              const parsed = JSON.parse(e.newValue);
+              const icon = parsed?.customization?.identity?.siteIcon;
+              if (icon) {
+                this.applyFavicon(icon);
+              }
+            } catch (_) {}
+          }
+        });
+
+        if (typeof document !== 'undefined') {
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+              this.reapplyActiveFavicon();
+            }
+          });
+        }
+
+        window.addEventListener('focus', () => {
+          this.reapplyActiveFavicon();
+        });
+      }
+    }
+
+    reapplyActiveFavicon() {
+      try {
+        let icon = null;
+        if (typeof window !== 'undefined' && window.PortfolioDataService) {
+          const d = window.PortfolioDataService.getData();
+          icon = d?.customization?.identity?.siteIcon;
+        }
+        if (!icon && typeof localStorage !== 'undefined') {
+          const raw = localStorage.getItem('hamilio_portfolio_site_data_v1');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            icon = parsed?.customization?.identity?.siteIcon;
+          }
+        }
+        if (icon) {
+          this.applyFavicon(icon);
+        }
+      } catch (_) {}
+    }
+
+    broadcastFavicon(url) {
+      if (!url) return;
+      this.applyFavicon(url);
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          const bc = new BroadcastChannel('hamilio_favicon_sync');
+          bc.postMessage({ type: 'FAVICON_UPDATE', url: url });
+          bc.close();
+        } catch (_) {}
+      }
     }
 
     initIndexedDB() {

@@ -704,38 +704,49 @@
     document.documentElement.setAttribute('xml:lang', docLang);
     document.documentElement.setAttribute('translate', 'yes');
 
-    renderHero(data.hero);
-    renderAbout(data.about);
-    renderSkills(data.skills);
-    renderServices(data.services);
-    renderResume(data.resume);
-    renderPortfolio(data.portfolio);
-    if (data.seo) renderSEO(data.seo);
-    if (data.customization) renderCustomization(data.customization);
-
-    if (window.SiteI18n) {
-      window.SiteI18n.reapplyCurrentLanguage();
+    // Render Customization (identity, site title, colors, typography, favicon) first
+    try {
+      if (data.customization) renderCustomization(data.customization);
+    } catch (err) {
+      console.warn("Customization render warning:", err);
     }
+
+    try { renderHero(data.hero); } catch (e) { console.warn("Hero render warning:", e); }
+    try { renderAbout(data.about); } catch (e) { console.warn("About render warning:", e); }
+    try { renderSkills(data.skills); } catch (e) { console.warn("Skills render warning:", e); }
+    try { renderServices(data.services); } catch (e) { console.warn("Services render warning:", e); }
+    try { renderResume(data.resume); } catch (e) { console.warn("Resume render warning:", e); }
+    try { renderPortfolio(data.portfolio); } catch (e) { console.warn("Portfolio render warning:", e); }
+    try { if (data.seo) renderSEO(data.seo); } catch (e) { console.warn("SEO render warning:", e); }
+
+    try {
+      if (window.SiteI18n) {
+        window.SiteI18n.reapplyCurrentLanguage();
+      }
+    } catch (_) {}
 
     // Explicit safeguard: ensure hero title and about headline match data when viewing in English/default
-    if (!window.SiteI18n || window.SiteI18n.getLanguage() === 'en') {
-      const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
-      if (titleEl && data.hero && data.hero.title) {
-        titleEl.textContent = data.hero.title;
+    try {
+      if (!window.SiteI18n || window.SiteI18n.getLanguage() === 'en') {
+        const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
+        if (titleEl && data.hero && data.hero.title) {
+          titleEl.textContent = data.hero.title;
+        }
+        const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
+        if (headlineEl && data.about && data.about.headline) {
+          headlineEl.textContent = data.about.headline;
+        }
       }
-      const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
-      if (headlineEl && data.about && data.about.headline) {
-        headlineEl.textContent = data.about.headline;
-      }
-    }
+    } catch (_) {}
 
-    if (window.HamilioImageOptimizer) {
-      window.HamilioImageOptimizer.upgradeContainerImages(document);
-    }
+    try {
+      if (window.HamilioImageOptimizer) {
+        window.HamilioImageOptimizer.upgradeContainerImages(document);
+      }
+    } catch (_) {}
   }
 
-  // Initial load
-  document.addEventListener('DOMContentLoaded', function () {
+  function bootDynamicRenderer() {
     renderAll();
     initContactForm();
 
@@ -754,33 +765,48 @@
       });
     }
 
-    // Listen for live updates from admin panel in other tabs
+    // Listen for live updates on the current window
     window.addEventListener('portfolioDataUpdated', function (e) {
       if (e.detail) {
-        renderHero(e.detail.hero);
-        renderAbout(e.detail.about);
-        renderSkills(e.detail.skills);
-        renderServices(e.detail.services);
-        renderResume(e.detail.resume);
-        renderPortfolio(e.detail.portfolio);
-        if (e.detail.seo) renderSEO(e.detail.seo);
-        if (e.detail.customization) renderCustomization(e.detail.customization);
-        if (window.SiteI18n) {
-          window.SiteI18n.reapplyCurrentLanguage();
-        }
-        if (!window.SiteI18n || window.SiteI18n.getLanguage() === 'en') {
-          const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
-          if (titleEl && e.detail.hero && e.detail.hero.title) {
-            titleEl.textContent = e.detail.hero.title;
-          }
-          const headlineEl = document.querySelector('#about .about-me .content h3') || document.querySelector('#about .content h3');
-          if (headlineEl && e.detail.about && e.detail.about.headline) {
-            headlineEl.textContent = e.detail.about.headline;
-          }
-        }
+        renderAll();
       }
     });
-  });
+
+    // Cross-tab live synchronization via localStorage storage event
+    window.addEventListener('storage', function (e) {
+      if (e.key === 'hamilio_portfolio_site_data_v1' && e.newValue) {
+        try {
+          const newData = JSON.parse(e.newValue);
+          if (newData && window.PortfolioDataService) {
+            window.PortfolioDataService.cachedData = newData;
+            renderAll();
+          }
+        } catch (_) {}
+      }
+    });
+
+    // Cross-tab live synchronization via BroadcastChannel
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const bc = new BroadcastChannel('hamilio_portfolio_sync');
+        bc.onmessage = function (event) {
+          if (event.data && event.data.type === 'DATA_UPDATED' && event.data.data) {
+            if (window.PortfolioDataService) {
+              window.PortfolioDataService.cachedData = event.data.data;
+            }
+            renderAll();
+          }
+        };
+      } catch (_) {}
+    }
+  }
+
+  // Initial load: boot immediately if DOM ready, otherwise wait for DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootDynamicRenderer);
+  } else {
+    bootDynamicRenderer();
+  }
 
   window.DynamicRenderer = {
     renderAll: renderAll

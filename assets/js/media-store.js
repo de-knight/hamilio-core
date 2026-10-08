@@ -399,15 +399,15 @@
           const store = tx.objectStore(STORE_NAME);
           const req = store.get(id);
           req.onsuccess = () => {
-            if (req.result) {
-              const updated = {
-                ...req.result,
-                ...updates,
-                fileBlob: fileBlob,
-                mimeType: fileBlob.type || req.result.mimeType
-              };
-              store.put(updated);
-            }
+            const baseItem = req.result || this.getMediaItem(id) || { id };
+            const updated = {
+              ...baseItem,
+              ...updates,
+              id: id,
+              fileBlob: fileBlob,
+              mimeType: fileBlob.type || (baseItem && baseItem.mimeType) || 'image/webp'
+            };
+            store.put(updated);
           };
         } catch (e) {
           console.warn("IndexedDB update error:", e);

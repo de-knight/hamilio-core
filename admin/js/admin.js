@@ -1540,14 +1540,38 @@
         if (statusDetails) statusDetails.textContent = `Optimizing [${i + 1}/${items.length}]: ${item.name || item.title}`;
 
         try {
-          const displayUrl = await this.resolveAdminDisplayUrl(item.url);
-          const opt = await window.HamilioImageOptimizer.optimize(displayUrl, {
+          let sourceToOpt = null;
+
+          // 1. If item is in IndexedDB, extract the binary Blob directly (bypasses all URL/CORS limits)
+          if (item.url && item.url.startsWith('idb:') && window.HamilioMediaStore) {
+            const fileRec = await window.HamilioMediaStore.getFile(item.id || item.url.substring(4));
+            if (fileRec && fileRec.fileBlob) {
+              sourceToOpt = fileRec.fileBlob;
+            }
+          }
+
+          // 2. If built-in or normal URL, resolve display URL and try fetching binary blob
+          if (!sourceToOpt) {
+            const displayUrl = await this.resolveAdminDisplayUrl(item.url);
+            try {
+              const resp = await fetch(displayUrl);
+              if (resp.ok) {
+                sourceToOpt = await resp.blob();
+              } else {
+                sourceToOpt = displayUrl;
+              }
+            } catch (_) {
+              sourceToOpt = displayUrl;
+            }
+          }
+
+          const opt = await window.HamilioImageOptimizer.optimize(sourceToOpt, {
             format: targetFormat,
             quality: 0.82,
             maxDimension: 1920
           });
 
-          if (opt && opt.success) {
+          if (opt && opt.success && opt.blob) {
             convertedCount++;
             totalSaved += (opt.savedBytes > 0 ? opt.savedBytes : 0);
 
@@ -1557,34 +1581,35 @@
               name: newName,
               format: newFormat,
               size: opt.optimizedSizeFormatted,
-              url: opt.dataUrl || item.url
+              dimensions: `${opt.width} × ${opt.height} px`,
+              url: `idb:${item.id}`
             };
 
-            if (item.id.startsWith('bm_')) {
-              // Built-in media asset
-              window.HamilioMediaStore.updateMediaMeta(item.id, updates);
-            } else {
-              // Uploaded asset in IndexedDB
-              await window.HamilioMediaStore.updateMediaFileBlob(item.id, opt.blob, updates);
-            }
+            // Persist the newly converted binary blob in IndexedDB
+            await window.HamilioMediaStore.updateMediaFileBlob(item.id, opt.blob, updates);
           }
         } catch (err) {
           console.warn(`Could not optimize ${item.name}:`, err);
         }
       }
 
-      if (statusTitle) statusTitle.textContent = `✓ Converted ${convertedCount} images to ${targetFormat.toUpperCase()}!`;
-      if (statusDetails) statusDetails.textContent = `Total Bandwidth Saved: ${window.HamilioMediaStore.formatFileSize(totalSaved)}`;
+      if (convertedCount > 0) {
+        if (statusTitle) statusTitle.textContent = `✓ Converted ${convertedCount} image(s) to ${targetFormat.toUpperCase()}!`;
+        if (statusDetails) statusDetails.textContent = `Total Bandwidth Saved: ${window.HamilioMediaStore.formatFileSize(totalSaved)}`;
+        showToast(`Successfully converted ${convertedCount} image(s) to ${targetFormat.toUpperCase()}! Saved ${window.HamilioMediaStore.formatFileSize(totalSaved)}.`, 'success');
+      } else {
+        if (statusTitle) statusTitle.textContent = `⚠ No images were converted to ${targetFormat.toUpperCase()}`;
+        if (statusDetails) statusDetails.textContent = `Selected images may already be optimized. You can also upload new images directly with Auto-Optimize enabled!`;
+        showToast(`No images were converted. Check image formats or console for details.`, 'warning');
+      }
 
       setTimeout(() => {
         if (statusCard) statusCard.style.display = 'none';
-      }, 3500);
+      }, 4000);
 
       this.clearMediaSelection();
       this.populateMediaLibrary();
       this.updateOptimizationMetrics();
-
-      showToast(`Successfully converted ${convertedCount} images to ${targetFormat.toUpperCase()}! Saved ${window.HamilioMediaStore.formatFileSize(totalSaved)}.`, 'success');
     }
 
     async runBatchImageOptimization() {

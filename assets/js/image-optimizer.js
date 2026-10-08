@@ -80,27 +80,98 @@
       blob = source;
       originalSize = source.size;
     } else if (typeof source === 'string') {
-      if (source.startsWith('data:')) {
-        // Base64 data URL
-        const byteString = atob(source.split(',')[1]);
-        originalSize = byteString.length;
+      const srcStr = source.trim();
+
+      // 1. Data URLs: Convert directly to Blob in memory (bypasses all network/CORS)
+      if (srcStr.startsWith('data:')) {
+        try {
+          const parts = srcStr.split(',');
+          const mimeMatch = parts[0].match(/:(.*?);/);
+          const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+          const bstr = atob(parts[1]);
+          let n = bstr.length;
+          const u8arr = new Uint8Array(n);
+          while (n--) u8arr[n] = bstr.charCodeAt(n);
+          blob = new Blob([u8arr], { type: mime });
+          originalSize = blob.size;
+          name = 'image.' + (mime.split('/')[1] || 'png');
+        } catch (e) {
+          // If decoding failed, proceed to image element
+        }
       }
-      // Fetch or create image
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          resolve({
-            image: img,
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-            originalSize: originalSize || 0,
-            name: (source.split('/').pop().split('?')[0]) || 'image'
-          });
-        };
-        img.onerror = (err) => reject(new Error('Failed to load image from URL: ' + source));
-        img.src = source;
-      });
+
+      // 2. Blob URLs: Retrieve underlying blob via fetch
+      if (!blob && srcStr.startsWith('blob:')) {
+        try {
+          const resp = await fetch(srcStr);
+          if (resp.ok) {
+            blob = await resp.blob();
+            originalSize = blob.size;
+          }
+        } catch (e) {
+          // fetch blob failed, proceed to Image element
+        }
+      }
+
+      // 3. Relative or Same-Origin URLs: Try fetch() first (avoids canvas tainting & CORS cache bugs)
+      if (!blob && typeof fetch === 'function') {
+        try {
+          const resp = await fetch(srcStr, { mode: 'cors' });
+          if (resp.ok) {
+            blob = await resp.blob();
+            originalSize = blob.size;
+            name = (srcStr.split('/').pop().split('?')[0]) || 'image';
+          }
+        } catch (e) {
+          // fetch failed (e.g. file:/// protocol or strict CORS); will fallback to Image element
+        }
+      }
+
+      // 4. Fallback: Load via HTMLImageElement
+      if (!blob) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          const isHttp = /^https?:\/\//i.test(srcStr);
+          const isSameOrigin = typeof window !== 'undefined' && window.location && srcStr.startsWith(window.location.origin);
+          
+          // Only set crossOrigin if it is an external HTTP URL
+          if (isHttp && !isSameOrigin) {
+            img.crossOrigin = 'anonymous';
+          }
+
+          img.onload = () => {
+            resolve({
+              image: img,
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+              originalSize: originalSize || 0,
+              name: (srcStr.split('/').pop().split('?')[0]) || 'image'
+            });
+          };
+
+          img.onerror = () => {
+            // If crossOrigin was set and failed, retry once without crossOrigin
+            if (img.crossOrigin) {
+              const retryImg = new Image();
+              retryImg.onload = () => {
+                resolve({
+                  image: retryImg,
+                  width: retryImg.naturalWidth,
+                  height: retryImg.naturalHeight,
+                  originalSize: originalSize || 0,
+                  name: (srcStr.split('/').pop().split('?')[0]) || 'image'
+                });
+              };
+              retryImg.onerror = () => reject(new Error('Failed to load image from URL: ' + srcStr));
+              retryImg.src = srcStr;
+            } else {
+              reject(new Error('Failed to load image from URL: ' + srcStr));
+            }
+          };
+
+          img.src = srcStr;
+        });
+      }
     }
 
     if (blob) {
@@ -113,7 +184,8 @@
             width: bitmap.width,
             height: bitmap.height,
             originalSize: originalSize,
-            name: name
+            name: name,
+            blob: blob
           };
         } catch (e) {
           // Fallback to standard Image
@@ -130,10 +202,11 @@
             width: img.naturalWidth,
             height: img.naturalHeight,
             originalSize: originalSize,
-            name: name
+            name: name,
+            blob: blob
           });
         };
-        img.onerror = (err) => {
+        img.onerror = () => {
           URL.revokeObjectURL(url);
           reject(new Error('Failed to decode image file'));
         };
@@ -222,23 +295,68 @@
 
       const mimeType = targetFormat === 'avif' ? 'image/avif' : 'image/webp';
 
-      // Convert to Blob
+      // Convert to Blob with robust fallback (toBlob -> toDataURL -> fallback format)
+      let exportDataUrl = null;
       const optimizedBlob = await new Promise((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            // Fallback to WebP if AVIF failed
-            if (mimeType === 'image/avif') {
-              canvas.toBlob((fallbackBlob) => {
-                if (fallbackBlob) resolve(fallbackBlob);
-                else reject(new Error('Canvas export failed'));
-              }, 'image/webp', quality);
+        const tryExport = (mType, q) => {
+          let called = false;
+          try {
+            if (typeof canvas.toBlob === 'function') {
+              canvas.toBlob((blob) => {
+                if (called) return;
+                called = true;
+                if (blob) {
+                  resolve(blob);
+                } else {
+                  fallbackDataUrl(mType, q);
+                }
+              }, mType, q);
             } else {
-              reject(new Error('Canvas export failed'));
+              fallbackDataUrl(mType, q);
             }
+          } catch (err) {
+            fallbackDataUrl(mType, q, err);
           }
-        }, mimeType, quality);
+        };
+
+        const fallbackDataUrl = (mType, q, prevErr) => {
+          try {
+            const dUrl = canvas.toDataURL(mType, q);
+            if (dUrl && dUrl.length > 50) {
+              exportDataUrl = dUrl;
+              const parts = dUrl.split(',');
+              const bstr = atob(parts[1]);
+              let n = bstr.length;
+              const u8 = new Uint8Array(n);
+              while (n--) u8[n] = bstr.charCodeAt(n);
+              resolve(new Blob([u8], { type: mType }));
+              return;
+            }
+          } catch (e) {}
+
+          if (mType === 'image/avif') {
+            // Fallback to WebP if AVIF is unsupported
+            tryExport('image/webp', quality);
+          } else if (mType === 'image/webp') {
+            // Fallback to JPEG if WebP export fails
+            try {
+              const jUrl = canvas.toDataURL('image/jpeg', quality);
+              exportDataUrl = jUrl;
+              const parts = jUrl.split(',');
+              const bstr = atob(parts[1]);
+              let n = bstr.length;
+              const u8 = new Uint8Array(n);
+              while (n--) u8[n] = bstr.charCodeAt(n);
+              resolve(new Blob([u8], { type: 'image/jpeg' }));
+            } catch (finalErr) {
+              reject(prevErr || finalErr || new Error('Canvas export failed'));
+            }
+          } else {
+            reject(prevErr || new Error('Canvas export failed'));
+          }
+        };
+
+        tryExport(mimeType, quality);
       });
 
       // Cleanup bitmap memory if applicable
@@ -272,6 +390,7 @@
         success: true,
         blob: finalBlob,
         blobUrl: blobUrl,
+        dataUrl: exportDataUrl || blobUrl,
         format: finalFormat,
         mimeType: finalMime,
         filename: newFilename,

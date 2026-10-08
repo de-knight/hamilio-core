@@ -681,7 +681,7 @@
 
       if (bar && msgEl && switchBtn && dismissBtn) {
         if (flagEl) flagEl.textContent = flag;
-        msgEl.textContent = `Visiting from ${country}? Switch to ${langData.nativeName} (${langData.langName})?`;
+        msgEl.textContent = `Visiting from ${country}? Prefer ${langData.nativeName}?`;
         switchBtn.textContent = `Switch to ${langData.nativeName}`;
         dismissBtn.textContent = 'Keep English';
         bar.style.display = 'flex';
@@ -697,7 +697,20 @@
 
     dismissLanguageSuggestion() {
       const bar = document.getElementById('cookie-lang-suggestion-bar');
-      if (bar) bar.style.display = 'none';
+      if (bar) {
+        bar.style.transition = 'opacity 0.2s ease, max-height 0.25s ease, padding 0.25s ease';
+        bar.style.overflow = 'hidden';
+        bar.style.maxHeight = bar.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          bar.style.opacity = '0';
+          bar.style.maxHeight = '0';
+          bar.style.paddingTop = '0';
+          bar.style.paddingBottom = '0';
+          setTimeout(() => {
+            bar.style.display = 'none';
+          }, 260);
+        });
+      }
       localStorage.setItem('hamilio_lang_suggest_dismissed', 'true');
     }
 

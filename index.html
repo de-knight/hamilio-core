@@ -666,7 +666,7 @@
   <!-- ======= Footer Cookie & Privacy Consent Popup ======= -->
   <aside id="cookie-consent-popup" class="cookie-popup" role="dialog" aria-labelledby="cookie-popup-title" aria-describedby="cookie-popup-desc">
     <div class="cookie-popup-content">
-      <!-- First-Visit Location Language Suggestion Bar -->
+      <!-- First-Visit Location Language Suggestion Bar (Seamless Integrated Top Banner) -->
       <div id="cookie-lang-suggestion-bar" class="cookie-lang-suggestion-bar" style="display: none;">
         <div class="cookie-lang-suggestion-text">
           <span id="cookie-lang-flag" class="cookie-lang-flag" aria-hidden="true">🌐</span>
@@ -685,19 +685,22 @@
         <div class="cookie-popup-body">
           <div class="cookie-popup-header-row">
             <h4 id="cookie-popup-title">Privacy &amp; Cookie Preferences</h4>
-            <div class="cookie-lang-control" title="Change Language">
-              <i class="icofont-globe" aria-hidden="true"></i>
-              <label for="cookie-lang-select" class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Change Language</label>
-              <select id="cookie-lang-select" class="cookie-lang-select" aria-label="Change Language">
-                <option value="en">English (US)</option>
-                <option value="bn">বাংলা (Bengali)</option>
-                <option value="es">Español (Spanish)</option>
-                <option value="de">Deutsch (German)</option>
-                <option value="fr">Français (French)</option>
-                <option value="ar">العربية (Arabic)</option>
-                <option value="ja">日本語 (Japanese)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-              </select>
+            <div class="cookie-header-controls">
+              <div class="cookie-lang-control" title="Change Language">
+                <i class="icofont-globe" aria-hidden="true"></i>
+                <label for="cookie-lang-select" class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Change Language</label>
+                <select id="cookie-lang-select" class="cookie-lang-select" aria-label="Change Language">
+                  <option value="en">English (US)</option>
+                  <option value="bn">বাংলা (Bengali)</option>
+                  <option value="es">Español (Spanish)</option>
+                  <option value="de">Deutsch (German)</option>
+                  <option value="fr">Français (French)</option>
+                  <option value="ar">العربية (Arabic)</option>
+                  <option value="ja">日本語 (Japanese)</option>
+                  <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+              </div>
+              <button type="button" id="btn-close-cookie-popup" class="cookie-popup-close-btn" aria-label="Close Notice" title="Dismiss notice">&times;</button>
             </div>
           </div>
           <p id="cookie-popup-desc">
@@ -709,7 +712,6 @@
           <button type="button" id="btn-reject-cookies" class="cookie-btn cookie-btn-reject">Reject All</button>
           <button type="button" id="btn-accept-cookies" class="cookie-btn cookie-btn-accept">Accept All</button>
         </div>
-        <button type="button" id="btn-close-cookie-popup" class="cookie-popup-close" aria-label="Close Notice">&times;</button>
       </div>
     </div>
   </aside>

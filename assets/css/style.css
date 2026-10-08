@@ -1453,39 +1453,58 @@ iframe {
   width: 100%;
 }
 
-/* Seamless Integrated Location Language Suggestion Strip */
+/* Integrated Top Header & Location Language Bar */
 .cookie-lang-suggestion-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: linear-gradient(90deg, rgba(24, 210, 110, 0.12) 0%, rgba(24, 210, 110, 0.03) 100%);
-  border-bottom: 1px solid rgba(24, 210, 110, 0.22);
-  padding: 9px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 16px;
   width: 100%;
   box-sizing: border-box;
-  animation: cookieFadeDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px 14px 0 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes cookieFadeDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+.cookie-lang-suggestion-bar.has-suggestion {
+  background: linear-gradient(90deg, rgba(24, 210, 110, 0.16) 0%, rgba(24, 210, 110, 0.06) 45%, rgba(13, 17, 23, 0.8) 100%);
+  border-bottom: 1px solid rgba(24, 210, 110, 0.22);
+}
+
+.cookie-lang-suggestion-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .cookie-lang-suggestion-text {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 0.8125rem;
   color: #f1f5f9;
-  line-height: 1.4;
-  flex: 1;
+  line-height: 1.35;
+  flex-shrink: 1;
   min-width: 0;
 }
 
 .cookie-lang-flag {
-  font-size: 1.15rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #18d26e;
+  background: rgba(24, 210, 110, 0.15);
+  border: 1px solid rgba(24, 210, 110, 0.35);
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
   flex-shrink: 0;
 }
 
@@ -1501,8 +1520,8 @@ iframe {
   color: #042513;
   border: 1px solid #18d26e;
   border-radius: 6px;
-  padding: 5px 14px;
-  font-size: 0.775rem;
+  padding: 4px 12px;
+  font-size: 0.76rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -1521,11 +1540,12 @@ iframe {
 .cookie-lang-btn-dismiss {
   background: rgba(255, 255, 255, 0.05);
   color: #cbd5e1;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 0.775rem;
+  padding: 4px 10px;
+  font-size: 0.76rem;
   font-family: inherit;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s ease;
@@ -1534,59 +1554,44 @@ iframe {
 .cookie-lang-btn-dismiss:hover {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
-/* Main Body Row */
-.cookie-popup-main-wrap {
+/* Default Top Bar Title (Shown when suggestion is not active) */
+.cookie-bar-default-title {
   display: flex;
   align-items: center;
-  gap: 16px;
-  width: 100%;
-  padding: 16px 20px;
-  box-sizing: border-box;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.cookie-popup-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: rgba(24, 210, 110, 0.1);
-  border: 1px solid rgba(24, 210, 110, 0.22);
+.cookie-bar-shield-icon {
   color: #18d26e;
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   flex-shrink: 0;
 }
 
-.cookie-popup-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.cookie-popup-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 5px;
-}
-
-.cookie-popup-header-row h4 {
-  font-size: 0.95rem;
+.cookie-popup-title-text {
+  font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
   margin: 0;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
+/* Right Controls Cluster: Language Select & Furthest Right Close Button */
 .cookie-header-controls {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* Language Selector Dropdown Chip */
@@ -1594,10 +1599,10 @@ iframe {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 7px;
-  padding: 3px 8px;
+  border-radius: 6px;
+  padding: 4px 8px;
   color: #cbd5e1;
   font-size: 0.75rem;
   transition: border-color 0.2s ease, background-color 0.2s ease;
@@ -1607,13 +1612,14 @@ iframe {
 .cookie-lang-control:hover,
 .cookie-lang-control:focus-within {
   border-color: rgba(24, 210, 110, 0.5);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.6);
   color: #ffffff;
 }
 
 .cookie-lang-control i {
   font-size: 0.875rem;
   color: #18d26e;
+  line-height: 1;
 }
 
 .cookie-lang-select {
@@ -1633,7 +1639,7 @@ iframe {
   padding: 8px;
 }
 
-/* Sleek Close Button in Header Cluster */
+/* Sleek Close Button on Furthest Right Corner */
 .cookie-popup-close-btn,
 .cookie-popup-close {
   display: inline-flex;
@@ -1642,21 +1648,73 @@ iframe {
   width: 26px;
   height: 26px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.65);
   font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
   padding: 0;
   border-radius: 6px;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .cookie-popup-close-btn:hover,
 .cookie-popup-close:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Main Body Row */
+.cookie-popup-main-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 18px;
+  box-sizing: border-box;
+}
+
+.cookie-popup-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(24, 210, 110, 0.1);
+  border: 1px solid rgba(24, 210, 110, 0.2);
+  color: #18d26e;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.cookie-popup-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cookie-popup-header-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.cookie-popup-header-row h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Hide inner header row & icon when top bar is already displaying the default title */
+.cookie-popup:not(.has-suggestion) .cookie-popup-header-row {
+  display: none;
+}
+.cookie-popup:not(.has-suggestion) .cookie-popup-icon {
+  display: none;
 }
 
 .cookie-popup-body p {
@@ -1737,6 +1795,11 @@ iframe {
   flex-direction: row-reverse;
 }
 
+.cookie-popup.is-rtl .cookie-header-controls {
+  margin-left: 0;
+  margin-right: auto;
+}
+
 .cookie-popup.is-rtl .cookie-policy-link {
   margin-left: 0;
   margin-right: 6px;
@@ -1758,10 +1821,67 @@ iframe {
   }
 
   .cookie-lang-suggestion-bar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .cookie-popup-title-text {
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+    flex-shrink: 1;
+  }
+
+  .cookie-header-controls {
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .cookie-lang-control {
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    gap: 4px;
+    max-width: 86px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .cookie-lang-select {
+    font-size: 0.72rem;
+    width: 56px;
+    max-width: 56px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cookie-popup-close-btn,
+  .cookie-popup-close {
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .cookie-lang-suggestion-bar.has-suggestion {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+  }
+
+  .cookie-lang-suggestion-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-    padding: 10px 14px;
+    width: 100%;
+    order: 1;
+  }
+
+  .cookie-lang-suggestion-text {
+    width: 100%;
+    font-size: 0.8rem;
   }
 
   .cookie-lang-suggestion-actions {
@@ -1775,6 +1895,14 @@ iframe {
     flex: 1;
     text-align: center;
     padding: 6px 10px;
+  }
+
+  .cookie-popup.has-suggestion .cookie-header-controls {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    order: 2;
   }
 
   .cookie-popup-main-wrap {

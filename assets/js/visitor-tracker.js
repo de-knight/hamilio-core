@@ -674,6 +674,9 @@
       const flag = this.currentGeo?.flag || '🌐';
 
       const bar = document.getElementById('cookie-lang-suggestion-bar');
+      const popup = document.getElementById('cookie-consent-popup');
+      const content = document.getElementById('cookie-lang-suggestion-content');
+      const defTitle = document.getElementById('cookie-bar-default-title');
       const flagEl = document.getElementById('cookie-lang-flag');
       const msgEl = document.getElementById('cookie-lang-suggestion-msg');
       const switchBtn = document.getElementById('btn-accept-lang-suggestion');
@@ -684,6 +687,10 @@
         msgEl.textContent = `Visiting from ${country}? Prefer ${langData.nativeName}?`;
         switchBtn.textContent = `Switch to ${langData.nativeName}`;
         dismissBtn.textContent = 'Keep English';
+        bar.classList.add('has-suggestion');
+        if (popup) popup.classList.add('has-suggestion');
+        if (content) content.style.display = 'flex';
+        if (defTitle) defTitle.style.display = 'none';
         bar.style.display = 'flex';
       }
     }
@@ -697,19 +704,23 @@
 
     dismissLanguageSuggestion() {
       const bar = document.getElementById('cookie-lang-suggestion-bar');
-      if (bar) {
-        bar.style.transition = 'opacity 0.2s ease, max-height 0.25s ease, padding 0.25s ease';
-        bar.style.overflow = 'hidden';
-        bar.style.maxHeight = bar.scrollHeight + 'px';
-        requestAnimationFrame(() => {
-          bar.style.opacity = '0';
-          bar.style.maxHeight = '0';
-          bar.style.paddingTop = '0';
-          bar.style.paddingBottom = '0';
-          setTimeout(() => {
-            bar.style.display = 'none';
-          }, 260);
-        });
+      const popup = document.getElementById('cookie-consent-popup');
+      const content = document.getElementById('cookie-lang-suggestion-content');
+      const defTitle = document.getElementById('cookie-bar-default-title');
+      if (content) {
+        content.style.transition = 'opacity 0.2s ease, max-height 0.25s ease';
+        content.style.overflow = 'hidden';
+        content.style.opacity = '0';
+        setTimeout(() => {
+          content.style.display = 'none';
+          if (bar) bar.classList.remove('has-suggestion');
+          if (popup) popup.classList.remove('has-suggestion');
+          if (defTitle) defTitle.style.display = 'flex';
+        }, 220);
+      } else {
+        if (bar) bar.classList.remove('has-suggestion');
+        if (popup) popup.classList.remove('has-suggestion');
+        if (defTitle) defTitle.style.display = 'flex';
       }
       localStorage.setItem('hamilio_lang_suggest_dismissed', 'true');
     }
@@ -749,6 +760,8 @@
       // Update Cookie Consent Banner
       const titleEl = document.getElementById('cookie-popup-title');
       if (titleEl) titleEl.textContent = t.title;
+      const barTitleText = document.querySelector('.cookie-popup-title-text');
+      if (barTitleText) barTitleText.textContent = t.title;
 
       const descTextEl = document.getElementById('cookie-popup-desc-text');
       if (descTextEl) descTextEl.textContent = t.desc;

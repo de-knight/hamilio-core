@@ -666,15 +666,43 @@
   <!-- ======= Footer Cookie & Privacy Consent Popup ======= -->
   <aside id="cookie-consent-popup" class="cookie-popup" role="dialog" aria-labelledby="cookie-popup-title" aria-describedby="cookie-popup-desc">
     <div class="cookie-popup-content">
-      <!-- First-Visit Location Language Suggestion Bar (Seamless Integrated Top Banner) -->
-      <div id="cookie-lang-suggestion-bar" class="cookie-lang-suggestion-bar" style="display: none;">
-        <div class="cookie-lang-suggestion-text">
-          <span id="cookie-lang-flag" class="cookie-lang-flag" aria-hidden="true">🌐</span>
-          <span id="cookie-lang-suggestion-msg">Visiting from Bangladesh? Switch to বাংলা (Bengali)?</span>
+      <!-- Integrated Top Header & Location Language Bar -->
+      <div id="cookie-lang-suggestion-bar" class="cookie-lang-suggestion-bar">
+        <!-- Suggestion Content (When geo-location suggestion triggers) -->
+        <div id="cookie-lang-suggestion-content" class="cookie-lang-suggestion-content" style="display: none;">
+          <div class="cookie-lang-suggestion-text">
+            <span id="cookie-lang-flag" class="cookie-lang-flag" aria-hidden="true">🌐</span>
+            <span id="cookie-lang-suggestion-msg">Visiting from Bangladesh? Prefer বাংলা?</span>
+          </div>
+          <div class="cookie-lang-suggestion-actions">
+            <button type="button" id="btn-accept-lang-suggestion" class="cookie-lang-btn-switch">Switch to বাংলা</button>
+            <button type="button" id="btn-dismiss-lang-suggestion" class="cookie-lang-btn-dismiss">Keep English</button>
+          </div>
         </div>
-        <div class="cookie-lang-suggestion-actions">
-          <button type="button" id="btn-accept-lang-suggestion" class="cookie-lang-btn-switch">Switch to বাংলা</button>
-          <button type="button" id="btn-dismiss-lang-suggestion" class="cookie-lang-btn-dismiss">Keep English</button>
+
+        <!-- Default Title (When no geo-suggestion is active or after dismiss) -->
+        <div id="cookie-bar-default-title" class="cookie-bar-default-title">
+          <i class="icofont-shield-alt cookie-bar-shield-icon" aria-hidden="true"></i>
+          <span class="cookie-popup-title-text">Privacy &amp; Cookie Preferences</span>
+        </div>
+
+        <!-- Right Controls: Language Selector Dropdown & Furthest Right Close Button -->
+        <div class="cookie-header-controls">
+          <div class="cookie-lang-control" title="Change Language">
+            <i class="icofont-globe" aria-hidden="true"></i>
+            <label for="cookie-lang-select" class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Change Language</label>
+            <select id="cookie-lang-select" class="cookie-lang-select" aria-label="Change Language">
+              <option value="en">English (US)</option>
+              <option value="bn">বাংলা (Bengali)</option>
+              <option value="es">Español (Spanish)</option>
+              <option value="de">Deutsch (German)</option>
+              <option value="fr">Français (French)</option>
+              <option value="ar">العربية (Arabic)</option>
+              <option value="ja">日本語 (Japanese)</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+            </select>
+          </div>
+          <button type="button" id="btn-close-cookie-popup" class="cookie-popup-close-btn" aria-label="Close Notice" title="Dismiss notice">&times;</button>
         </div>
       </div>
 
@@ -685,23 +713,6 @@
         <div class="cookie-popup-body">
           <div class="cookie-popup-header-row">
             <h4 id="cookie-popup-title">Privacy &amp; Cookie Preferences</h4>
-            <div class="cookie-header-controls">
-              <div class="cookie-lang-control" title="Change Language">
-                <i class="icofont-globe" aria-hidden="true"></i>
-                <label for="cookie-lang-select" class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Change Language</label>
-                <select id="cookie-lang-select" class="cookie-lang-select" aria-label="Change Language">
-                  <option value="en">English (US)</option>
-                  <option value="bn">বাংলা (Bengali)</option>
-                  <option value="es">Español (Spanish)</option>
-                  <option value="de">Deutsch (German)</option>
-                  <option value="fr">Français (French)</option>
-                  <option value="ar">العربية (Arabic)</option>
-                  <option value="ja">日本語 (Japanese)</option>
-                  <option value="hi">हिन्दी (Hindi)</option>
-                </select>
-              </div>
-              <button type="button" id="btn-close-cookie-popup" class="cookie-popup-close-btn" aria-label="Close Notice" title="Dismiss notice">&times;</button>
-            </div>
           </div>
           <p id="cookie-popup-desc">
             <span id="cookie-popup-desc-text">We use minimal cookies and anonymous visitor telemetry (approx. country, device, staying time) to analyze portfolio traffic and elevate user experience. No personal ad tracking.</span>

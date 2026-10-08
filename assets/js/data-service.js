@@ -16,7 +16,7 @@
     version: 5,
     hero: {
       name: "Hamim Mahamud Hamy",
-      title: "Head of Creative & HR | Business Management Executive",
+      title: "Head of Creative & HR",
       tagline: "Leading creative direction, technical web optimization, SEO strategy, and agile operations at Omega Solution.",
       bgWebp: "",
       bgFallback: "assets/img/bg1-opt.jpg",
@@ -370,6 +370,10 @@
               if (p.mediaUrl === 'assets/img/pp1.png') p.mediaUrl = 'assets/img/pp1-opt.jpg';
               if (p.mediaUrl === 'assets/img/PlanetEarth.png') p.mediaUrl = 'assets/img/PlanetEarth-opt.jpg';
             });
+          }
+
+          if (parsed.hero && parsed.hero.title === 'Head of Creative & HR | Business Management Executive') {
+            parsed.hero.title = 'Head of Creative & HR';
           }
 
           // Automatic Upgrade to Version 2 (Head of Creative & HR / Business Management Executive profile)

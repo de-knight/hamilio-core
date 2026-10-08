@@ -21,7 +21,7 @@
     if (nameEl && hero.name) nameEl.textContent = hero.name;
 
     // Professional Title / Focus (Underlined text inside H2)
-    const titleEl = document.querySelector('#header h2 span');
+    const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
     if (titleEl && hero.title) titleEl.textContent = hero.title;
 
     // Hero Tagline / Sub-headline (Paragraph beneath H2)
@@ -713,6 +713,14 @@
       window.SiteI18n.reapplyCurrentLanguage();
     }
 
+    // Explicit safeguard: ensure the hero title always matches data.hero.title when viewing in English/default
+    if (!window.SiteI18n || window.SiteI18n.getLanguage() === 'en') {
+      const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
+      if (titleEl && data.hero && data.hero.title) {
+        titleEl.textContent = data.hero.title;
+      }
+    }
+
     if (window.HamilioImageOptimizer) {
       window.HamilioImageOptimizer.upgradeContainerImages(document);
     }
@@ -749,6 +757,15 @@
         renderPortfolio(e.detail.portfolio);
         if (e.detail.seo) renderSEO(e.detail.seo);
         if (e.detail.customization) renderCustomization(e.detail.customization);
+        if (window.SiteI18n) {
+          window.SiteI18n.reapplyCurrentLanguage();
+        }
+        if (!window.SiteI18n || window.SiteI18n.getLanguage() === 'en') {
+          const titleEl = document.querySelector('#header h2 .hero-focus-title') || document.querySelector('#header h2 span');
+          if (titleEl && e.detail.hero && e.detail.hero.title) {
+            titleEl.textContent = e.detail.hero.title;
+          }
+        }
       }
     });
   });

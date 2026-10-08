@@ -30,7 +30,7 @@
       },
       hero: {
         iam: 'I am',
-        title: 'Head of Creative & HR | Business Management Executive',
+        title: 'Head of Creative & HR',
         atCompany: 'at Omega Solution',
         tagline: 'Leading creative direction, technical web optimization, SEO strategy, and agile operations at Omega Solution.'
       },
@@ -215,7 +215,7 @@
       },
       hero: {
         iam: 'আমি',
-        title: 'হেড অব ক্রিয়েটিভ অ্যান্ড এইচআর | বিজনেস ম্যানেজমেন্ট এক্সিকিউটিভ',
+        title: 'হেড অব ক্রিয়েটিভ অ্যান্ড এইচআর',
         atCompany: 'ওমেগা সলিউশন-এ',
         tagline: 'ওমেগা সলিউশন-এ ক্রিয়েটিভ দিকনির্দেশনা, কারিগরি ওয়েব অপ্টিমাইজেশন, এসইও কৌশল এবং অ্যাজাইল কার্যক্রম পরিচালনা করছি।'
       },
@@ -400,7 +400,7 @@
       },
       hero: {
         iam: 'Soy',
-        title: 'Director Creativo y de RRHH | Ejecutivo de Gestión Empresarial',
+        title: 'Director Creativo y de RRHH',
         atCompany: 'en Omega Solution',
         tagline: 'Liderando la dirección creativa, optimización web técnica, estrategia SEO y operaciones ágiles en Omega Solution.'
       },
@@ -585,7 +585,7 @@
       },
       hero: {
         iam: 'Ich bin',
-        title: 'Leiter Kreation & Personal | Business Management Executive',
+        title: 'Leiter Kreation & Personal',
         atCompany: 'bei Omega Solution',
         tagline: 'Leitung von Creative Direction, technischer Web-Optimierung, SEO-Strategie und agilen Abläufen bei Omega Solution.'
       },
@@ -770,7 +770,7 @@
       },
       hero: {
         iam: 'Je suis',
-        title: 'Directeur de Création & RH | Responsable de la Gestion d\'Entreprise',
+        title: 'Directeur de Création & RH',
         atCompany: 'chez Omega Solution',
         tagline: 'Pilotage de la direction créative, de l\'optimisation web technique, de la stratégie SEO et des opérations agiles chez Omega Solution.'
       },
@@ -955,7 +955,7 @@
       },
       hero: {
         iam: 'أنا',
-        title: 'مدير الإبداع والموارد البشرية | مسؤول إدارة الأعمال',
+        title: 'مدير الإبداع والموارد البشرية',
         atCompany: 'في Omega Solution',
         tagline: 'قيادة التوجيه الإبداعي والتحسين التقني للمواقع واستراتيجيات تحسين محركات البحث والعمليات الرشيقة في Omega Solution.'
       },
@@ -1140,7 +1140,7 @@
       },
       hero: {
         iam: '私は',
-        title: 'クリエイティブ＆人事責任者 | 経営管理エグゼクティブ',
+        title: 'クリエイティブ＆人事責任者',
         atCompany: '（Omega Solution所属）',
         tagline: 'Omega Solutionにおいて、クリエイティブディレクション、テクニカルWeb最適化、SEO戦略、アジャイル運営をリード。'
       },
@@ -1325,7 +1325,7 @@
       },
       hero: {
         iam: 'मैं',
-        title: 'हेड ऑफ क्रिएटिव एंड एचआर | बिजनेस मैनेजमेंट एग्जीक्यूटिव',
+        title: 'हेड ऑफ क्रिएटिव एंड एचआर',
         atCompany: 'ओमेगा सॉल्यूशन में',
         tagline: 'ओमेगा सॉल्यूशन में क्रिएटिव निर्देशन, तकनीकी वेब अनुकूलन, एसईओ रणनीति और चुस्त संचालन का नेतृत्व।'
       },
@@ -1561,15 +1561,40 @@
         });
       }
 
+      // Fetch live data from PortfolioDataService if available
+      let liveData = null;
+      try {
+        if (window.PortfolioDataService && typeof window.PortfolioDataService.getData === 'function') {
+          liveData = window.PortfolioDataService.getData();
+        }
+      } catch (_) {}
+
       // 3. Hero Section
       if (t.hero) {
         const heroH2 = document.querySelector('#header h2');
         if (heroH2) {
-          heroH2.innerHTML = `${t.hero.iam} <span class="hero-focus-title">${t.hero.title}</span> ${t.hero.atCompany}`;
+          let heroTitle = t.hero.title;
+          const liveHeroTitle = (liveData && liveData.hero && liveData.hero.title) ? liveData.hero.title.trim() : '';
+
+          if (langCode === 'en' && liveHeroTitle) {
+            heroTitle = liveHeroTitle;
+          } else if (langCode !== 'en' && liveHeroTitle) {
+            // If the user customized the title away from standard role, preserve their custom title
+            const isStandardRole = /head of creative/i.test(liveHeroTitle) || /creative & hr/i.test(liveHeroTitle);
+            if (!isStandardRole) {
+              heroTitle = liveHeroTitle;
+            }
+          }
+
+          heroH2.innerHTML = `${t.hero.iam} <span class="hero-focus-title">${heroTitle}</span> ${t.hero.atCompany}`;
         }
         const taglineEl = document.querySelector('#header .hero-tagline') || document.querySelector('#hero-tagline-text');
         if (taglineEl) {
-          taglineEl.textContent = t.hero.tagline;
+          let heroTagline = t.hero.tagline;
+          if (langCode === 'en' && liveData && liveData.hero && liveData.hero.tagline) {
+            heroTagline = liveData.hero.tagline;
+          }
+          taglineEl.textContent = heroTagline;
         }
       }
 
@@ -1581,10 +1606,22 @@
         if (abSub) abSub.textContent = t.about.subtitle;
 
         const headlineEl = document.querySelector('#about .about-me .content h3');
-        if (headlineEl) headlineEl.textContent = t.about.headline;
+        if (headlineEl) {
+          if (langCode === 'en' && liveData && liveData.about && liveData.about.headline) {
+            headlineEl.textContent = liveData.about.headline;
+          } else {
+            headlineEl.textContent = t.about.headline;
+          }
+        }
 
         const quoteEl = document.querySelector('#about .about-me .content p.font-italic');
-        if (quoteEl) quoteEl.textContent = t.about.quote;
+        if (quoteEl) {
+          if (langCode === 'en' && liveData && liveData.about && liveData.about.quote) {
+            quoteEl.textContent = liveData.about.quote;
+          } else {
+            quoteEl.textContent = t.about.quote;
+          }
+        }
 
         // Labels & values
         const infoItems = document.querySelectorAll('#about .about-me .content .row ul li');
@@ -1601,22 +1638,34 @@
           } else if (text.startsWith('city') || text.startsWith('শহর') || text.startsWith('ciudad') || text.startsWith('stadt') || text.startsWith('ville') || text.startsWith('المدينة') || text.startsWith('居住地') || text.startsWith('शहर')) {
             strong.textContent = t.about.labelCity + ' ';
             const span = li.querySelector('#about-city') || li.querySelector('span');
-            if (span) span.textContent = t.about.valCity;
+            if (span) {
+              span.textContent = (langCode === 'en' && liveData && liveData.about && liveData.about.city) ? liveData.about.city : t.about.valCity;
+            }
           } else if (text.startsWith('degree') || text.startsWith('ডিগ্রি') || text.startsWith('titul') || text.startsWith('abschluss') || text.startsWith('dipl') || text.startsWith('المؤهل') || text.startsWith('学位') || text.startsWith('डिग्री')) {
             strong.textContent = t.about.labelDegree + ' ';
             const span = li.querySelector('#about-degree') || li.querySelector('span');
-            if (span) span.textContent = t.about.valDegree;
+            if (span) {
+              span.textContent = (langCode === 'en' && liveData && liveData.about && liveData.about.degree) ? liveData.about.degree : t.about.valDegree;
+            }
           } else if (text.startsWith('email') || text.startsWith('ইমেইল') || text.startsWith('correo') || text.startsWith('البريد') || text.startsWith('メール')) {
             strong.textContent = t.about.labelEmail + ' ';
           } else if (text.startsWith('freelance') || text.startsWith('ফ্রিল্যান্স') || text.startsWith('freiberuflich') || text.startsWith('العمل') || text.startsWith('フリーランス') || text.startsWith('फ्रीलांस')) {
             strong.textContent = t.about.labelFreelance + ' ';
             const span = li.querySelector('#about-freelance') || li.querySelector('span');
-            if (span) span.textContent = t.about.valFreelance;
+            if (span) {
+              span.textContent = (langCode === 'en' && liveData && liveData.about && liveData.about.freelance) ? liveData.about.freelance : t.about.valFreelance;
+            }
           }
         });
 
         const bioEl = document.getElementById('about-bio');
-        if (bioEl) bioEl.textContent = t.about.bio;
+        if (bioEl) {
+          if (langCode === 'en' && liveData && liveData.about && liveData.about.bio) {
+            bioEl.textContent = liveData.about.bio;
+          } else {
+            bioEl.textContent = t.about.bio;
+          }
+        }
 
         // Stats (Counts)
         const statBoxes = document.querySelectorAll('#about .counts .count-box p');
@@ -1706,9 +1755,11 @@
           const cardData = t.services.cards[idx];
           if (!cardData) return;
           const h4Link = card.querySelector('h4 a');
-          if (h4Link) h4Link.textContent = cardData.title;
           const p = card.querySelector('p');
-          if (p) p.textContent = cardData.desc;
+          if (langCode !== 'en') {
+            if (h4Link) h4Link.textContent = cardData.title;
+            if (p) p.textContent = cardData.desc;
+          }
 
           // Keep WhatsApp preset inquiry link aligned
           const englishTitle = canonicalTitles[idx] || (window.SiteI18n.translations.en.services.cards[idx] ? window.SiteI18n.translations.en.services.cards[idx].title : cardData.title);
@@ -1748,11 +1799,13 @@
           const itemData = t.portfolio.items[key];
           if (!itemData) return;
 
-          const h3 = row.querySelector('.content h3');
-          if (h3) h3.textContent = itemData.title;
+          if (langCode !== 'en') {
+            const h3 = row.querySelector('.content h3');
+            if (h3) h3.textContent = itemData.title;
 
-          const pDesc = row.querySelector('.content p.font-italic');
-          if (pDesc) pDesc.textContent = itemData.desc;
+            const pDesc = row.querySelector('.content p.font-italic');
+            if (pDesc) pDesc.textContent = itemData.desc;
+          }
 
           // Update Category inside list
           const lis = row.querySelectorAll('.content ul li');

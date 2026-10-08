@@ -397,7 +397,7 @@
       const h = this.currentData.hero || {};
       const idTagline = (this.currentData.customization && this.currentData.customization.identity && this.currentData.customization.identity.tagline) || '';
       this.setVal('hero-name', h.name || 'Hamim Mahamud Hamy');
-      this.setVal('hero-title', h.title || 'Head of Creative & HR | Business Management Executive');
+      this.setVal('hero-title', h.title || 'Head of Creative & HR');
       this.setVal('hero-tagline', h.tagline || idTagline || 'Leading creative direction, technical web optimization, SEO strategy, and agile operations at Omega Solution.');
       this.setVal('hero-bg-webp', h.bgWebp || '');
       this.setVal('hero-bg-fallback', h.bgFallback || 'assets/img/bg1-opt.jpg');

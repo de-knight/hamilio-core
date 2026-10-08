@@ -680,6 +680,9 @@
               <button type="button" class="filter-pill" onclick="adminApp.filterMediaLibrary('image', this)"><i data-lucide="image"></i> Images (<span id="media-count-image">0</span>)</button>
               <button type="button" class="filter-pill" onclick="adminApp.filterMediaLibrary('video', this)"><i data-lucide="video"></i> Videos (<span id="media-count-video">0</span>)</button>
               <button type="button" class="filter-pill" onclick="adminApp.filterMediaLibrary('document', this)"><i data-lucide="file-text"></i> Documents (<span id="media-count-doc">0</span>)</button>
+              <button type="button" class="btn-secondary" id="btn-restore-default-media" style="display: none; padding: 4px 10px; font-size: 0.78rem; align-items: center; gap: 4px; margin-left: 6px;" onclick="adminApp.restoreDefaultMedia()" title="Restore default system assets">
+                <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i> Restore Defaults
+              </button>
             </div>
             <div style="min-width: 220px;">
               <input type="text" id="media-search-input" class="form-control" placeholder="Search media by name..." style="padding: 6px 12px; font-size: 0.85rem;" oninput="adminApp.searchMediaLibrary(this.value)">
@@ -689,9 +692,9 @@
           <!-- Batch Selection & Format Conversion Action Bar -->
           <div class="media-batch-action-bar" id="media-batch-action-bar">
             <div class="batch-bar-left">
-              <label class="batch-select-all-label" title="Select or deselect all visible images">
+              <label class="batch-select-all-label" title="Select or deselect all visible files">
                 <input type="checkbox" id="media-select-all-checkbox" class="media-checkbox-custom-input" onchange="adminApp.toggleSelectAllMedia(this.checked)">
-                <span class="batch-select-all-text">Select All Images</span>
+                <span class="batch-select-all-text">Select All</span>
               </label>
               <span class="batch-selected-count-badge" id="batch-selected-count-badge" style="display: none;">
                 <span id="batch-selected-count">0</span> Selected
@@ -702,7 +705,7 @@
             </div>
 
             <div class="batch-bar-right">
-              <!-- Selected Conversion Buttons -->
+              <!-- Selected Operations -->
               <div class="batch-action-subgroup">
                 <span class="batch-subgroup-label">Selected:</span>
                 <button type="button" class="btn-batch-opt btn-batch-webp" id="btn-batch-sel-webp" onclick="adminApp.convertSelectedImages('webp')" disabled title="Convert selected images to WebP">
@@ -710,6 +713,9 @@
                 </button>
                 <button type="button" class="btn-batch-opt btn-batch-avif" id="btn-batch-sel-avif" onclick="adminApp.convertSelectedImages('avif')" disabled title="Convert selected images to AVIF">
                   <i data-lucide="sparkles"></i> Convert to AVIF
+                </button>
+                <button type="button" class="btn-batch-opt btn-batch-delete" id="btn-batch-sel-delete" onclick="adminApp.deleteSelectedMedia()" disabled title="Permanently delete selected files">
+                  <i data-lucide="trash-2"></i> Delete Selected
                 </button>
               </div>
 
@@ -1659,11 +1665,16 @@
           <small class="helper-text">Short note shown in file info cards and media tooltips.</small>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-          <button type="button" class="btn-secondary" onclick="adminApp.closeEditMediaModal()">Cancel</button>
-          <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">
-            <i data-lucide="check"></i> Save Changes
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn-danger" style="padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px;" onclick="adminApp.deleteMediaFromEditModal()">
+            <i data-lucide="trash-2"></i> Delete File
           </button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-secondary" onclick="adminApp.closeEditMediaModal()">Cancel</button>
+            <button type="submit" class="btn-primary" style="width: auto; padding: 10px 24px;">
+              <i data-lucide="check"></i> Save Changes
+            </button>
+          </div>
         </div>
       </form>
     </div>

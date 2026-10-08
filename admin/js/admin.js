@@ -1410,13 +1410,10 @@
         );
       }
 
-      // Filter only images
-      const images = visible.filter(m => m.type === 'image');
-
       if (checked) {
-        images.forEach(img => {
-          this.selectedMediaIds.add(img.id);
-          const card = document.getElementById(`card-${img.id}`);
+        visible.forEach(item => {
+          this.selectedMediaIds.add(item.id);
+          const card = document.getElementById(`card-${item.id}`);
           if (card) {
             card.classList.add('is-selected');
             const cb = card.querySelector('.media-card-checkbox');
@@ -1424,9 +1421,9 @@
           }
         });
       } else {
-        images.forEach(img => {
-          this.selectedMediaIds.delete(img.id);
-          const card = document.getElementById(`card-${img.id}`);
+        visible.forEach(item => {
+          this.selectedMediaIds.delete(item.id);
+          const card = document.getElementById(`card-${item.id}`);
           if (card) {
             card.classList.remove('is-selected');
             const cb = card.querySelector('.media-card-checkbox');
@@ -1456,6 +1453,7 @@
       const clearBtn = document.getElementById('btn-batch-clear-btn');
       const selWebp = document.getElementById('btn-batch-sel-webp');
       const selAvif = document.getElementById('btn-batch-sel-avif');
+      const selDelete = document.getElementById('btn-batch-sel-delete');
       const selectAll = document.getElementById('media-select-all-checkbox');
       const bar = document.getElementById('media-batch-action-bar');
 
@@ -1464,18 +1462,39 @@
       if (clearBtn) clearBtn.style.display = count > 0 ? 'inline-block' : 'none';
       if (selWebp) selWebp.disabled = count === 0;
       if (selAvif) selAvif.disabled = count === 0;
+      if (selDelete) {
+        selDelete.disabled = count === 0;
+        selDelete.innerHTML = `<i data-lucide="trash-2"></i> Delete Selected${count > 0 ? ` (${count})` : ''}`;
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      }
       if (bar) {
         if (count > 0) bar.classList.add('has-selection');
         else bar.classList.remove('has-selection');
       }
 
-      // Check if all visible images are selected
+      // Check if all visible items are selected
       if (selectAll && window.HamilioMediaStore) {
-        const allImgs = window.HamilioMediaStore.getAllMedia().filter(m => m.type === 'image');
-        if (allImgs.length > 0 && count === allImgs.length) {
+        const all = window.HamilioMediaStore.getAllMedia();
+        let visible = all;
+        if (this.currentMediaFilter !== 'all') {
+          visible = visible.filter(m => m.type === this.currentMediaFilter);
+        }
+        if (this.currentMediaSearch) {
+          const q = this.currentMediaSearch.toLowerCase();
+          visible = visible.filter(m =>
+            (m.name && m.name.toLowerCase().includes(q)) ||
+            (m.title && m.title.toLowerCase().includes(q)) ||
+            (m.alt && m.alt.toLowerCase().includes(q)) ||
+            (m.description && m.description.toLowerCase().includes(q)) ||
+            (m.type && m.type.toLowerCase().includes(q))
+          );
+        }
+        if (visible.length > 0 && count >= visible.length) {
           selectAll.checked = true;
           selectAll.indeterminate = false;
-        } else if (count > 0 && count < allImgs.length) {
+        } else if (count > 0 && count < visible.length) {
           selectAll.checked = false;
           selectAll.indeterminate = true;
         } else {
@@ -1520,6 +1539,46 @@
       }
 
       await this.executeImageBatchConversion(allImages, format, `All ${count} Library Images`);
+    }
+
+    async deleteSelectedMedia() {
+      if (!this.selectedMediaIds || this.selectedMediaIds.size === 0) {
+        showToast('Please select at least one media file to delete.', 'warning');
+        return;
+      }
+
+      const count = this.selectedMediaIds.size;
+      const idsToDelete = Array.from(this.selectedMediaIds);
+
+      if (!confirm(`Are you sure you want to permanently delete the ${count} selected media file${count > 1 ? 's' : ''}? This action cannot be undone.`)) {
+        return;
+      }
+
+      let deletedCount = 0;
+      for (const id of idsToDelete) {
+        const ok = await window.HamilioMediaStore.deleteFile(id);
+        if (ok) deletedCount++;
+      }
+
+      this.clearMediaSelection();
+      this.populateMediaLibrary();
+      if (document.getElementById('media-picker-modal') && document.getElementById('media-picker-modal').style.display === 'flex') {
+        this.renderPickerGrid();
+      }
+      this.updateOptimizationMetrics();
+      showToast(`Successfully deleted ${deletedCount} media file${deletedCount > 1 ? 's' : ''}.`, 'success');
+    }
+
+    restoreDefaultMedia() {
+      if (!window.HamilioMediaStore) return;
+      if (!confirm('Restore all default system media assets to the library?')) return;
+      window.HamilioMediaStore.restoreDefaultMedia();
+      this.populateMediaLibrary();
+      if (document.getElementById('media-picker-modal') && document.getElementById('media-picker-modal').style.display === 'flex') {
+        this.renderPickerGrid();
+      }
+      this.updateOptimizationMetrics();
+      showToast('Default system assets restored.', 'success');
     }
 
     migrateConvertedBuiltinsToRegistry() {
@@ -3151,6 +3210,14 @@
       if (modal) modal.style.display = 'none';
     }
 
+    async deleteMediaFromEditModal() {
+      const idInput = document.getElementById('edit-media-id');
+      if (!idInput || !idInput.value) return;
+      const id = idInput.value;
+      this.closeEditMediaModal();
+      await this.deleteMediaFile(id);
+    }
+
     saveMediaEdit() {
       const idInput = document.getElementById('edit-media-id');
       const titleInput = document.getElementById('edit-media-title');
@@ -3320,7 +3387,10 @@
               <span class="popover-val">${item.date || 'System'}</span>
             </div>
           </div>
-          <div class="popover-footer" style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end;">
+          <div class="popover-footer" style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+            <button type="button" class="btn-media-delete-pop" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px; padding: 4px 10px; font-size: 0.74rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" onclick="adminApp.deleteMediaFile('${item.id}')">
+              <i data-lucide="trash-2" style="width: 12px; height: 12px;"></i> Delete
+            </button>
             <button type="button" class="popover-edit-btn" onclick="adminApp.openEditMediaModal('${item.id}')">
               <i data-lucide="pencil"></i> Edit Details
             </button>
@@ -3459,6 +3529,12 @@
       if (countVid) countVid.textContent = allItems.filter(m => m.type === 'video').length;
       if (countDoc) countDoc.textContent = allItems.filter(m => m.type === 'document').length;
 
+      const btnRestore = document.getElementById('btn-restore-default-media');
+      if (btnRestore) {
+        const hasDeleted = window.HamilioMediaStore && typeof window.HamilioMediaStore.hasDeletedBuiltins === 'function' && window.HamilioMediaStore.hasDeletedBuiltins();
+        btnRestore.style.display = hasDeleted ? 'inline-flex' : 'none';
+      }
+
       // Filter by type
       let filtered = allItems;
       if (this.currentMediaFilter !== 'all') {
@@ -3493,9 +3569,7 @@
       container.innerHTML = filtered.map(item => {
         const isBuiltIn = item.id.startsWith('bm_');
         const badgeBuiltin = isBuiltIn ? `<span class="media-badge-builtin">System</span>` : '';
-        const deleteBtn = !isBuiltIn
-          ? `<button type="button" class="btn-media-icon btn-media-delete" title="Delete file" aria-label="Delete file" onclick="adminApp.deleteMediaFile('${item.id}')"><i data-lucide="trash-2"></i></button>`
-          : '';
+        const deleteBtn = `<button type="button" class="btn-media-icon btn-media-delete" title="Delete file" aria-label="Delete file" onclick="adminApp.deleteMediaFile('${item.id}')"><i data-lucide="trash-2"></i></button>`;
 
         const details = this.getMediaCardDetails(item);
         const directSrc = (item.url && item.url.startsWith('assets/'))
@@ -3550,17 +3624,15 @@
               : '');
 
         const isSelected = this.selectedMediaIds && this.selectedMediaIds.has(item.id);
-        const selectCheckboxHtml = isRaster
-          ? `
-            <label class="media-card-select-label" title="Select image for WebP / AVIF conversion" onclick="event.stopPropagation();">
-              <input type="checkbox" class="media-card-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="adminApp.toggleMediaCardSelect('${item.id}', this.checked)">
-              <span class="media-card-checkbox-custom"><i data-lucide="check"></i></span>
-            </label>
-          `
-          : '';
+        const selectCheckboxHtml = `
+          <label class="media-card-select-label" title="Select file for batch operations" onclick="event.stopPropagation();">
+            <input type="checkbox" class="media-card-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="adminApp.toggleMediaCardSelect('${item.id}', this.checked)">
+            <span class="media-card-checkbox-custom"><i data-lucide="check"></i></span>
+          </label>
+        `;
 
         return `
-          <div class="media-card ${isSelected ? 'is-selected' : ''} ${isRaster ? 'has-select' : ''}" id="card-${item.id}">
+          <div class="media-card ${isSelected ? 'is-selected' : ''} has-select" id="card-${item.id}">
             ${selectCheckboxHtml}
             <span class="media-badge-type">${item.type}</span>
             ${badgeBuiltin}
@@ -3678,14 +3750,20 @@
     }
 
     async deleteMediaFile(id) {
-      if (!confirm('Are you sure you want to permanently delete this media file?')) return;
+      if (!window.HamilioMediaStore) return;
+      const item = window.HamilioMediaStore.getMediaItem(id);
+      const name = item ? (item.title || item.name || 'this media file') : 'this media file';
+      if (!confirm(`Are you sure you want to permanently delete "${name}"? This action cannot be undone.`)) return;
       const success = await window.HamilioMediaStore.deleteFile(id);
       if (success) {
-        showToast('Media file deleted.');
+        if (this.selectedMediaIds) this.selectedMediaIds.delete(id);
+        this.updateMediaSelectionUI();
+        showToast(`Deleted "${name}".`, 'success');
         this.populateMediaLibrary();
-        if (document.getElementById('media-picker-modal').style.display === 'flex') {
+        if (document.getElementById('media-picker-modal') && document.getElementById('media-picker-modal').style.display === 'flex') {
           this.renderPickerGrid();
         }
+        this.updateOptimizationMetrics();
       }
     }
 

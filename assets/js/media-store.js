@@ -299,15 +299,30 @@
     }
 
     /**
-     * Delete an uploaded media item
+     * Delete an uploaded or built-in media item
      */
     async deleteFile(id) {
       await this.initDBPromise;
 
-      // Cannot delete built-in assets
+      // Handle built-in assets deletion (hide from media library)
       if (id.startsWith('bm_')) {
-        alert("Built-in system assets cannot be deleted.");
-        return false;
+        let deletedBuiltins = [];
+        try {
+          deletedBuiltins = JSON.parse(localStorage.getItem('hamilio_deleted_builtin_media_v1') || '[]');
+        } catch (_) {}
+        if (!deletedBuiltins.includes(id)) {
+          deletedBuiltins.push(id);
+          localStorage.setItem('hamilio_deleted_builtin_media_v1', JSON.stringify(deletedBuiltins));
+        }
+        // Also remove any overrides for this item
+        try {
+          const overrides = JSON.parse(localStorage.getItem('hamilio_builtin_media_overrides_v1') || '{}');
+          if (overrides[id]) {
+            delete overrides[id];
+            localStorage.setItem('hamilio_builtin_media_overrides_v1', JSON.stringify(overrides));
+          }
+        } catch (_) {}
+        return true;
       }
 
       // Revoke any cached object URL
@@ -331,6 +346,30 @@
       registry = registry.filter(item => item.id !== id);
       this.saveRegistry(registry);
       return true;
+    }
+
+    /**
+     * Restore default system assets
+     */
+    restoreDefaultMedia() {
+      try {
+        localStorage.removeItem('hamilio_deleted_builtin_media_v1');
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    /**
+     * Check if any built-in system assets are currently hidden/deleted
+     */
+    hasDeletedBuiltins() {
+      try {
+        const deleted = JSON.parse(localStorage.getItem('hamilio_deleted_builtin_media_v1') || '[]');
+        return Array.isArray(deleted) && deleted.length > 0;
+      } catch (_) {
+        return false;
+      }
     }
 
     /**
@@ -443,13 +482,20 @@
         overrides = JSON.parse(localStorage.getItem('hamilio_builtin_media_overrides_v1') || '{}');
       } catch (_) {}
 
-      const mergedBuiltin = BUILTIN_MEDIA.map(item => {
-        const ov = overrides[item.id] || {};
-        return {
-          ...item,
-          ...ov
-        };
-      });
+      let deletedBuiltins = [];
+      try {
+        deletedBuiltins = JSON.parse(localStorage.getItem('hamilio_deleted_builtin_media_v1') || '[]');
+      } catch (_) {}
+
+      const mergedBuiltin = BUILTIN_MEDIA
+        .filter(item => !deletedBuiltins.includes(item.id))
+        .map(item => {
+          const ov = overrides[item.id] || {};
+          return {
+            ...item,
+            ...ov
+          };
+        });
 
       let combined = [...customMedia, ...mergedBuiltin];
 

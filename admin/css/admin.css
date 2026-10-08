@@ -3221,6 +3221,19 @@ select.form-control {
   box-shadow: 0 0 14px rgba(168, 85, 247, 0.25);
 }
 
+.btn-batch-delete {
+  background: rgba(239, 68, 68, 0.14);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.btn-batch-delete:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.28);
+  border-color: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.25);
+}
+
 .btn-batch-all {
   background: #181b22;
   color: #ededed;
